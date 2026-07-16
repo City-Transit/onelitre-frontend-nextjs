@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { apiFetch, ApiError } from '@/lib/api';
-import { COMING_SOON_CITIES, LAGOS_AREAS, LIVE_CITY } from '@/lib/locations';
 
 type RegisterRole = 'customer' | 'vendor';
 
@@ -19,12 +18,6 @@ export function RegisterForm() {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [businessName, setBusinessName] = useState('');
-  const [businessCity, setBusinessCity] = useState(LIVE_CITY);
-  const [businessArea, setBusinessArea] = useState('');
-  const [businessAddress, setBusinessAddress] = useState('');
-  const [businessPhone, setBusinessPhone] = useState('');
-  const [isRegisteredBusiness, setIsRegisteredBusiness] = useState<'yes' | 'no'>('no');
-  const [registrationNumber, setRegistrationNumber] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -45,20 +38,7 @@ export function RegisterForm() {
         method: 'POST',
         body: JSON.stringify(
           role === 'vendor'
-            ? {
-                role,
-                firstName,
-                lastName,
-                email,
-                businessName,
-                businessArea: `${businessArea}, ${businessCity}`,
-                businessAddress,
-                businessPhone,
-                isRegisteredBusiness: isRegisteredBusiness === 'yes',
-                registrationNumber:
-                  isRegisteredBusiness === 'yes' ? registrationNumber : undefined,
-                password,
-              }
+            ? { role, firstName, lastName, email, businessName, password }
             : { role, firstName, lastName, phone, email, password },
         ),
       });
@@ -163,103 +143,20 @@ export function RegisterForm() {
                   className={inputClass}
                 />
               </div>
-              <div className="flex gap-4">
-                <div className="flex w-full flex-col gap-2.5">
-                  <label className="font-semibold text-[14.5px]">City</label>
-                  <select
-                    required
-                    value={businessCity}
-                    onChange={(e) => setBusinessCity(e.target.value)}
-                    className={inputClass}
-                  >
-                    <option value={LIVE_CITY}>{LIVE_CITY}</option>
-                    {COMING_SOON_CITIES.map((city) => (
-                      <option key={city} value={city} disabled>
-                        {city} — coming soon
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex w-full flex-col gap-2.5">
-                  <label className="font-semibold text-[14.5px]">Area</label>
-                  <select
-                    required
-                    value={businessArea}
-                    onChange={(e) => setBusinessArea(e.target.value)}
-                    className={inputClass}
-                  >
-                    <option value="" disabled>
-                      Select an area
-                    </option>
-                    {LAGOS_AREAS.map((area) => (
-                      <option key={area} value={area}>
-                        {area}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
               <div className="flex flex-col gap-2.5">
-                <label className="font-semibold text-[14.5px]">Kitchen address</label>
+                <label className="font-semibold text-[14.5px]">Business email</label>
                 <input
                   required
-                  placeholder="12 Admiralty Way"
-                  value={businessAddress}
-                  onChange={(e) => setBusinessAddress(e.target.value)}
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className={inputClass}
                 />
               </div>
-              <div className="flex gap-4">
-                <div className="flex w-full flex-col gap-2.5">
-                  <label className="font-semibold text-[14.5px]">Business email</label>
-                  <input
-                    required
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className={inputClass}
-                  />
-                </div>
-                <div className="flex w-full flex-col gap-2.5">
-                  <label className="font-semibold text-[14.5px]">Business phone</label>
-                  <input
-                    required
-                    type="tel"
-                    placeholder="0801 234 5678"
-                    value={businessPhone}
-                    onChange={(e) => setBusinessPhone(e.target.value)}
-                    className={inputClass}
-                  />
-                </div>
-              </div>
-              <div className="flex flex-col gap-2.5">
-                <label className="font-semibold text-[14.5px]">
-                  Is your business registered?
-                </label>
-                <select
-                  required
-                  value={isRegisteredBusiness}
-                  onChange={(e) => setIsRegisteredBusiness(e.target.value as 'yes' | 'no')}
-                  className={inputClass}
-                >
-                  <option value="no">No</option>
-                  <option value="yes">Yes</option>
-                </select>
-              </div>
-              {isRegisteredBusiness === 'yes' && (
-                <div className="flex flex-col gap-2.5">
-                  <label className="font-semibold text-[14.5px]">
-                    Registration number (CAC/BN)
-                  </label>
-                  <input
-                    required
-                    placeholder="RC1234567"
-                    value={registrationNumber}
-                    onChange={(e) => setRegistrationNumber(e.target.value)}
-                    className={inputClass}
-                  />
-                </div>
-              )}
+              <p className="-mt-2 text-xs text-[#8A8073]">
+                You&apos;ll fill in your kitchen&apos;s address, contact, and cuisine details
+                from your dashboard before you can list meals.
+              </p>
             </>
           ) : (
             <>

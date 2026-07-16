@@ -43,16 +43,19 @@ export type VendorStatus = 'pending' | 'approved' | 'suspended';
 export interface Vendor {
   id: string;
   name: string;
-  area: string;
+  area?: string | null;
   address?: string | null;
   contactPhone?: string | null;
   isRegisteredBusiness?: boolean;
   registrationNumber?: string | null;
+  cuisines?: string[] | null;
+  estimatedPrepMinutes?: number | null;
   status?: VendorStatus;
   ownerId?: string | null;
   meals: Meal[];
   ratingAverage?: number | null;
   ratingCount?: number;
+  profileComplete?: boolean;
 }
 
 export interface Review {

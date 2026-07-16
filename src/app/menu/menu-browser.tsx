@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Vendor } from '@/lib/types';
+import { CUISINE_OPTIONS, PREP_TIME_OPTIONS } from '@/lib/vendor-options';
 
 const GRADIENTS = [
   'from-paprika/70 to-bg',
@@ -11,22 +12,71 @@ const GRADIENTS = [
   'from-paprika-dim/70 to-bg-alt',
 ];
 
+const PRICE_BUCKETS = [
+  { value: 'under-20k', label: 'Under ₦20,000', test: (p: number) => p < 20000 },
+  { value: '20k-40k', label: '₦20,000–₦40,000', test: (p: number) => p >= 20000 && p <= 40000 },
+  { value: 'over-40k', label: 'Above ₦40,000', test: (p: number) => p > 40000 },
+];
+
+const RATING_BUCKETS = [
+  { value: '4', label: '4+ stars', min: 4 },
+  { value: '3', label: '3+ stars', min: 3 },
+];
+
+function cheapestPrice(vendor: Vendor): number | null {
+  const prices = vendor.meals.flatMap((m) => m.sizes.map((s) => s.price));
+  return prices.length > 0 ? Math.min(...prices) : null;
+}
+
+const selectClass =
+  'rounded-[3px] border border-line bg-bg-alt px-3 py-2.5 text-[13.5px] text-paper focus:border-frost focus:outline-none';
+
 export function MenuBrowser({ vendors }: { vendors: Vendor[] }) {
   const [query, setQuery] = useState('');
+  const [cuisine, setCuisine] = useState('');
+  const [priceBucket, setPriceBucket] = useState('');
+  const [minRating, setMinRating] = useState('');
+  const [maxPrepMinutes, setMaxPrepMinutes] = useState('');
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return vendors;
 
     return vendors.filter((vendor) => {
-      if (vendor.name.toLowerCase().includes(q)) return true;
-      return vendor.meals.some(
-        (meal) =>
-          meal.name.toLowerCase().includes(q) ||
-          (meal.description ?? '').toLowerCase().includes(q),
-      );
+      if (q) {
+        const matchesSearch =
+          vendor.name.toLowerCase().includes(q) ||
+          vendor.meals.some(
+            (meal) =>
+              meal.name.toLowerCase().includes(q) ||
+              (meal.description ?? '').toLowerCase().includes(q),
+          );
+        if (!matchesSearch) return false;
+      }
+
+      if (cuisine && !vendor.cuisines?.includes(cuisine)) return false;
+
+      if (priceBucket) {
+        const price = cheapestPrice(vendor);
+        const bucket = PRICE_BUCKETS.find((b) => b.value === priceBucket);
+        if (price === null || !bucket?.test(price)) return false;
+      }
+
+      if (minRating) {
+        const bucket = RATING_BUCKETS.find((b) => b.value === minRating);
+        if (!vendor.ratingAverage || vendor.ratingAverage < (bucket?.min ?? 0)) return false;
+      }
+
+      if (maxPrepMinutes) {
+        if (
+          vendor.estimatedPrepMinutes == null ||
+          vendor.estimatedPrepMinutes > Number(maxPrepMinutes)
+        )
+          return false;
+      }
+
+      return true;
     });
-  }, [vendors, query]);
+  }, [vendors, query, cuisine, priceBucket, minRating, maxPrepMinutes]);
 
   return (
     <>
@@ -40,6 +90,57 @@ export function MenuBrowser({ vendors }: { vendors: Vendor[] }) {
         />
       </div>
 
+      <div className="mt-4 flex flex-wrap gap-2.5">
+        <select
+          value={cuisine}
+          onChange={(e) => setCuisine(e.target.value)}
+          className={selectClass}
+        >
+          <option value="">All cuisines</option>
+          {CUISINE_OPTIONS.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
+        <select
+          value={priceBucket}
+          onChange={(e) => setPriceBucket(e.target.value)}
+          className={selectClass}
+        >
+          <option value="">Any price</option>
+          {PRICE_BUCKETS.map((b) => (
+            <option key={b.value} value={b.value}>
+              {b.label}
+            </option>
+          ))}
+        </select>
+        <select
+          value={minRating}
+          onChange={(e) => setMinRating(e.target.value)}
+          className={selectClass}
+        >
+          <option value="">Any rating</option>
+          {RATING_BUCKETS.map((b) => (
+            <option key={b.value} value={b.value}>
+              {b.label}
+            </option>
+          ))}
+        </select>
+        <select
+          value={maxPrepMinutes}
+          onChange={(e) => setMaxPrepMinutes(e.target.value)}
+          className={selectClass}
+        >
+          <option value="">Any prep time</option>
+          {PREP_TIME_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
       <div className="mt-8">
         {vendors.length === 0 && (
           <p className="border-t border-line py-12 text-muted">
@@ -49,7 +150,9 @@ export function MenuBrowser({ vendors }: { vendors: Vendor[] }) {
 
         {vendors.length > 0 && filtered.length === 0 && (
           <p className="border-t border-line py-12 text-muted">
-            No vendors or meals match &ldquo;{query}&rdquo;.
+            {query
+              ? <>No vendors or meals match &ldquo;{query}&rdquo;.</>
+              : 'No vendors match these filters.'}
           </p>
         )}
 
