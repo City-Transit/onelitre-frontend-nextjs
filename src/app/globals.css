@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #0f1e1b;
+  --bg-alt: #0a1513;
+  --paper: #f3ecde;
+  --paper-dim: #e7dfce;
+  --paprika: #d9762b;
+  --paprika-dim: #b5601f;
+  --frost: #8fe0d2;
+  --ink: #12211d;
+  --muted: #9cafa8;
+  --line: rgba(236, 231, 218, 0.14);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-alt: var(--bg-alt);
+  --color-paper: var(--paper);
+  --color-paper-dim: var(--paper-dim);
+  --color-paprika: var(--paprika);
+  --color-paprika-dim: var(--paprika-dim);
+  --color-frost: var(--frost);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --font-serif: var(--font-fraunces);
+  --font-mono: var(--font-space-mono);
+  --font-sans: var(--font-manrope);
+}
+
+*{
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--bg);
+  color: var(--paper);
+  font-family: var(--font-sans), sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--paprika);
+  color: var(--ink);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-serif), serif;
+  font-weight: 560;
+  letter-spacing: -0.01em;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--frost);
+  outline-offset: 3px;
+}

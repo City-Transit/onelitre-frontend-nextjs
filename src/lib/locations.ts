@@ -1,0 +1,37 @@
+export const LIVE_CITY = 'Lagos';
+
+export const COMING_SOON_CITIES = ['Abuja', 'Port Harcourt'];
+
+export const LAGOS_AREAS = [
+  'Agege',
+  'Ajah',
+  'Alimosho',
+  'Amuwo Odofin',
+  'Apapa',
+  'Egbeda',
+  'Ejigbo',
+  'Festac',
+  'Gbagada',
+  'Ibeju-Lekki',
+  'Ifako-Ijaiye',
+  'Ikeja',
+  'Ikorodu',
+  'Ikoyi',
+  'Ilupeju',
+  'Isolo',
+  'Ketu',
+  'Lekki',
+  'Magodo',
+  'Maryland',
+  'Mile 12',
+  'Mushin',
+  'Ogba',
+  'Ogudu',
+  'Ojo',
+  'Ojota',
+  'Oshodi',
+  'Shomolu',
+  'Surulere',
+  'Victoria Island',
+  'Yaba',
+];
