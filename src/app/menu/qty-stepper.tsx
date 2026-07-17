@@ -5,7 +5,7 @@ import type { MealSize } from '@/lib/types';
 
 const naira = (n: number) => `₦${n.toLocaleString('en-NG')}`;
 
-export function QtyStepper({ size }: { size: MealSize }) {
+export function QtyStepper({ size, vendorId }: { size: MealSize; vendorId: string }) {
   const { cart, setQty } = useCart();
   const qty = cart[size.id] ?? 0;
 
@@ -20,7 +20,7 @@ export function QtyStepper({ size }: { size: MealSize }) {
       </span>
       {qty === 0 ? (
         <button
-          onClick={() => setQty(size.id, 1)}
+          onClick={() => setQty(size.id, 1, vendorId)}
           className="rounded-full bg-paprika px-2.5 py-1 font-bold text-ink"
         >
           +
@@ -28,14 +28,14 @@ export function QtyStepper({ size }: { size: MealSize }) {
       ) : (
         <div className="flex items-center gap-1">
           <button
-            onClick={() => setQty(size.id, qty - 1)}
+            onClick={() => setQty(size.id, qty - 1, vendorId)}
             className="h-6 w-6 rounded-full border border-line"
           >
             −
           </button>
           <span className="w-4 text-center">{qty}</span>
           <button
-            onClick={() => setQty(size.id, qty + 1)}
+            onClick={() => setQty(size.id, qty + 1, vendorId)}
             className="h-6 w-6 rounded-full border border-line"
           >
             +

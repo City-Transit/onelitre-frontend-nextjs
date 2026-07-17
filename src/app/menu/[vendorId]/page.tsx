@@ -70,7 +70,7 @@ export default async function VendorPage({
                 )}
                 <div className="mt-auto flex flex-wrap gap-2 pt-3">
                   {meal.sizes.map((size) => (
-                    <QtyStepper key={size.id} size={size} />
+                    <QtyStepper key={size.id} size={size} vendorId={vendor.id} />
                   ))}
                 </div>
               </div>

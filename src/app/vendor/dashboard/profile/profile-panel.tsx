@@ -23,12 +23,6 @@ export function ProfilePanel({ vendor }: { vendor: Vendor }) {
   const [area, setArea] = useState(parsed.area);
   const [address, setAddress] = useState(vendor.address ?? '');
   const [contactPhone, setContactPhone] = useState(vendor.contactPhone ?? '');
-  const [isRegisteredBusiness, setIsRegisteredBusiness] = useState<'yes' | 'no'>(
-    vendor.isRegisteredBusiness ? 'yes' : 'no',
-  );
-  const [registrationNumber, setRegistrationNumber] = useState(
-    vendor.registrationNumber ?? '',
-  );
   const [cuisines, setCuisines] = useState<string[]>(vendor.cuisines ?? []);
   const [estimatedPrepMinutes, setEstimatedPrepMinutes] = useState(
     vendor.estimatedPrepMinutes ? String(vendor.estimatedPrepMinutes) : '',
@@ -53,9 +47,6 @@ export function ProfilePanel({ vendor }: { vendor: Vendor }) {
           area: area ? `${area}, ${city}` : undefined,
           address: address || undefined,
           contactPhone: contactPhone || undefined,
-          isRegisteredBusiness: isRegisteredBusiness === 'yes',
-          registrationNumber:
-            isRegisteredBusiness === 'yes' ? registrationNumber || undefined : undefined,
           cuisines,
           estimatedPrepMinutes: estimatedPrepMinutes
             ? Number(estimatedPrepMinutes)
@@ -160,29 +151,6 @@ export function ProfilePanel({ vendor }: { vendor: Vendor }) {
           ))}
         </select>
       </div>
-
-      <div className="flex flex-col gap-2">
-        <label className="text-sm font-semibold">Is your business registered?</label>
-        <select
-          value={isRegisteredBusiness}
-          onChange={(e) => setIsRegisteredBusiness(e.target.value as 'yes' | 'no')}
-          className={inputClass}
-        >
-          <option value="no">No</option>
-          <option value="yes">Yes</option>
-        </select>
-      </div>
-      {isRegisteredBusiness === 'yes' && (
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-semibold">Registration number (CAC/BN)</label>
-          <input
-            placeholder="RC1234567"
-            value={registrationNumber}
-            onChange={(e) => setRegistrationNumber(e.target.value)}
-            className={inputClass}
-          />
-        </div>
-      )}
 
       {error && <p className="text-sm text-red-700">{error}</p>}
       {saved && !error && <p className="text-sm text-green-700">Profile saved.</p>}
