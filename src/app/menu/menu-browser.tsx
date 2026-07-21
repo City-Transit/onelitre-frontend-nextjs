@@ -132,7 +132,7 @@ export function MenuBrowser({ vendors }: { vendors: Vendor[] }) {
           onChange={(e) => setMaxPrepMinutes(e.target.value)}
           className={selectClass}
         >
-          <option value="">Any prep time</option>
+          <option value="">Any delivery time</option>
           {PREP_TIME_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>
               {o.label}

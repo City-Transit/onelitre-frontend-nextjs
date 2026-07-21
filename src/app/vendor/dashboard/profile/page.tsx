@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { serverApiFetch } from '@/lib/server-api';
+import { formatDate } from '@/lib/format';
 import type { Vendor, VendorDocument, VendorWalkthrough } from '@/lib/types';
 import { ProfilePanel } from './profile-panel';
 import { VerificationPanel } from './verification-panel';
@@ -26,7 +27,7 @@ export default async function VendorProfilePage() {
       {vendor.status === 'paused' && (
         <div className="rounded-[16px] bg-paper p-5 text-sm font-semibold text-red-700 shadow-[0_24px_60px_rgba(18,33,29,0.35)]">
           Your kitchen is paused
-          {vendor.pausedUntil && ` until ${new Date(vendor.pausedUntil).toLocaleDateString()}`} —
+          {vendor.pausedUntil && ` until ${formatDate(vendor.pausedUntil)}`} —
           contact support for details.
         </div>
       )}
@@ -54,21 +55,31 @@ export default async function VendorProfilePage() {
         <div className="rounded-[20px] bg-paper p-8 text-ink shadow-[0_24px_60px_rgba(18,33,29,0.35)]">
           <VerificationPanel vendor={vendor} initialDocuments={documents} />
           <p className="mt-4 text-sm font-semibold">
-            {vendor.certifiedAt ? (
+            {vendor.customAdvancePct != null &&
+            vendor.customRemainderPct != null &&
+            vendor.customCommissionPct != null ? (
               <span className="text-green-700">
-                Certified since {new Date(vendor.certifiedAt).toLocaleDateString()} — 60% advance
-                rate applies.
+                Custom payout split — {vendor.effectiveSplit.advancePct}% advance,{' '}
+                {vendor.effectiveSplit.remainderPct}% remainder,{' '}
+                {vendor.effectiveSplit.commissionPct}% commission, negotiated separately from the
+                standard/certified tiers.
+              </span>
+            ) : vendor.certifiedAt ? (
+              <span className="text-green-700">
+                Certified since {formatDate(vendor.certifiedAt)} —{' '}
+                {vendor.effectiveSplit.advancePct}% advance rate applies.
               </span>
             ) : (
               <span className="text-[#8A8073]">
                 Not yet certified — verify your CAC and food safety certificate above to unlock
-                the 60% advance rate. Standard rate (40% advance) applies until then.
+                the 60% advance rate. Standard rate ({vendor.effectiveSplit.advancePct}% advance)
+                applies until then.
               </span>
             )}
           </p>
           <p className="mt-2 text-xs text-[#8A8073]">
-            NIN and BVN verification are required separately before your kitchen can be approved
-            — they don&apos;t affect the Certified badge above.
+            NIN verification is required separately before your kitchen can be approved — it
+            doesn&apos;t affect the Certified badge above.
           </p>
         </div>
       </div>

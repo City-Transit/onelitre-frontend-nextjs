@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { serverApiFetch } from '@/lib/server-api';
 import { Pagination } from '@/components/pagination';
+import { formatDate } from '@/lib/format';
 import type { Paginated, User } from '@/lib/types';
 
 export default async function AdminCustomersPage({
@@ -46,7 +47,7 @@ export default async function AdminCustomersPage({
                   <td className="px-6 py-4 font-mono text-[#5B6B63]">{customer.phone ?? '—'}</td>
                   <td className="px-6 py-4 text-[#5B6B63]">{customer.address ?? '—'}</td>
                   <td className="px-6 py-4 font-mono text-xs text-[#5B6B63]">
-                    {new Date(customer.createdAt).toLocaleDateString()}
+                    {formatDate(customer.createdAt)}
                   </td>
                 </tr>
               ))}

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { apiFetch, ApiError } from '@/lib/api';
+import { formatDate } from '@/lib/format';
 import type { VendorOrderGroup } from '@/lib/types';
 
 const naira = (n: number) => `₦${n.toLocaleString('en-NG')}`;
@@ -130,7 +131,7 @@ export function OrdersPanel({ initialGroups }: { initialGroups: VendorOrderGroup
             return (
               <tr key={order.id} className="border-t border-[rgba(18,33,29,0.1)] align-top">
                 <td className="px-6 py-4 whitespace-nowrap">
-                  {new Date(order.createdAt).toLocaleDateString()}
+                  {formatDate(order.createdAt)}
                 </td>
                 <td className="px-6 py-4 text-[#5B6B63]">
                   <div>{order.deliveryAddress}</div>

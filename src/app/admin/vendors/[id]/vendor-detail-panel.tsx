@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { apiFetch, ApiError } from '@/lib/api';
+import { formatDate } from '@/lib/format';
 import { WALKTHROUGH_CHECKLIST_ITEMS } from '@/lib/vendor-walkthrough-checklist';
 import type {
   Vendor,
@@ -13,9 +15,10 @@ import type {
   VendorWalkthrough,
 } from '@/lib/types';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+
 const DOCUMENT_LABEL: Record<VendorDocumentType, string> = {
   nin: 'NIN',
-  bvn: 'BVN',
   cac: 'CAC certificate',
   food_safety: 'Food safety certificate',
 };
@@ -75,7 +78,7 @@ function VendorOrdersTable({
           {groups.map(({ order, items }) => (
             <tr key={order.id} className="border-t border-[rgba(18,33,29,0.1)]">
               <td className="px-4 py-3 whitespace-nowrap text-[#5B6B63]">
-                {new Date(order.createdAt).toLocaleDateString()}
+                {formatDate(order.createdAt)}
               </td>
               <td className="px-4 py-3">{order.deliveryAddress}</td>
               <td className="px-4 py-3 text-[#5B6B63] whitespace-nowrap">
@@ -110,6 +113,69 @@ export function VendorDetailPanel({
   initialWalkthroughs: VendorWalkthrough[];
   initialIncidents: VendorIncident[];
 }) {
+  const router = useRouter();
+  const [effectiveSplit, setEffectiveSplit] = useState(vendor.effectiveSplit);
+  const [customPcts, setCustomPcts] = useState({
+    advancePct: vendor.customAdvancePct,
+    remainderPct: vendor.customRemainderPct,
+    commissionPct: vendor.customCommissionPct,
+  });
+  const [commissionDraft, setCommissionDraft] = useState({
+    advancePct: vendor.customAdvancePct != null ? String(vendor.customAdvancePct) : '',
+    remainderPct: vendor.customRemainderPct != null ? String(vendor.customRemainderPct) : '',
+    commissionPct: vendor.customCommissionPct != null ? String(vendor.customCommissionPct) : '',
+  });
+  const [commissionBusy, setCommissionBusy] = useState(false);
+  const [commissionError, setCommissionError] = useState<string | null>(null);
+
+  async function saveCommissionOverride() {
+    setCommissionError(null);
+    const advancePct = Number(commissionDraft.advancePct);
+    const remainderPct = Number(commissionDraft.remainderPct);
+    const commissionPct = Number(commissionDraft.commissionPct);
+    if (advancePct + remainderPct + commissionPct !== 100) {
+      setCommissionError('advancePct, remainderPct and commissionPct must sum to 100.');
+      return;
+    }
+    setCommissionBusy(true);
+    try {
+      const updated: Vendor = await apiFetch(`/admin/vendors/${vendor.id}/commission`, {
+        method: 'PATCH',
+        body: JSON.stringify({ advancePct, remainderPct, commissionPct }),
+      });
+      setEffectiveSplit(updated.effectiveSplit);
+      setCustomPcts({
+        advancePct: updated.customAdvancePct,
+        remainderPct: updated.customRemainderPct,
+        commissionPct: updated.customCommissionPct,
+      });
+      router.refresh();
+    } catch {
+      setCommissionError('Something went wrong saving the override. Please try again.');
+    } finally {
+      setCommissionBusy(false);
+    }
+  }
+
+  async function clearCommissionOverride() {
+    setCommissionError(null);
+    setCommissionBusy(true);
+    try {
+      const updated: Vendor = await apiFetch(`/admin/vendors/${vendor.id}/commission`, {
+        method: 'PATCH',
+        body: JSON.stringify({}),
+      });
+      setEffectiveSplit(updated.effectiveSplit);
+      setCustomPcts({ advancePct: null, remainderPct: null, commissionPct: null });
+      setCommissionDraft({ advancePct: '', remainderPct: '', commissionPct: '' });
+      router.refresh();
+    } catch {
+      setCommissionError('Something went wrong clearing the override. Please try again.');
+    } finally {
+      setCommissionBusy(false);
+    }
+  }
+
   const [documents, setDocuments] = useState(initialDocuments);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [noteById, setNoteById] = useState<Record<string, string>>({});
@@ -217,10 +283,19 @@ export function VendorDetailPanel({
             <dt className="text-xs uppercase text-[#8A8073]">Contract</dt>
             <dd>
               {vendor.contractAcceptedAt
-                ? `Accepted ${new Date(vendor.contractAcceptedAt).toLocaleDateString()}`
+                ? `Signed "${vendor.contractSignatureName}" ${formatDate(vendor.contractAcceptedAt)}`
                 : vendor.contractDeclinedAt
-                  ? `Declined ${new Date(vendor.contractDeclinedAt).toLocaleDateString()}`
+                  ? `Declined ${formatDate(vendor.contractDeclinedAt)}`
                   : 'Not accepted'}
+              {' · '}
+              <a
+                href={`${API_BASE_URL}/admin/vendors/${vendor.id}/contract/pdf`}
+                target="_blank"
+                rel="noreferrer"
+                className="font-semibold underline"
+              >
+                Download PDF
+              </a>
             </dd>
           </div>
           <div>
@@ -229,7 +304,7 @@ export function VendorDetailPanel({
               {vendor.status ?? 'pending'}
               {vendor.status === 'paused' && vendor.pausedUntil && (
                 <span className="ml-1 text-xs normal-case text-[#8A8073]">
-                  (until {new Date(vendor.pausedUntil).toLocaleDateString()})
+                  (until {formatDate(vendor.pausedUntil)})
                 </span>
               )}
             </dd>
@@ -238,11 +313,88 @@ export function VendorDetailPanel({
             <div>
               <dt className="text-xs uppercase text-[#8A8073]">Dormancy risk</dt>
               <dd className="text-red-700">
-                Flagged {new Date(vendor.dormancyRiskAt).toLocaleDateString()}
+                Flagged {formatDate(vendor.dormancyRiskAt)}
               </dd>
             </div>
           )}
         </dl>
+      </div>
+
+      <div className="rounded-[20px] bg-paper p-6 text-ink shadow-[0_24px_60px_rgba(18,33,29,0.35)]">
+        <h3 className="font-semibold">Payout split</h3>
+        <p className="mt-1 text-sm text-[#5B6B63]">
+          {customPcts.advancePct != null ? (
+            <>
+              <span className="font-semibold text-green-700">Custom override active</span> —{' '}
+              {effectiveSplit.advancePct}% advance / {effectiveSplit.remainderPct}% remainder /{' '}
+              {effectiveSplit.commissionPct}% commission.
+            </>
+          ) : (
+            <>
+              Automatic ({vendor.certifiedAt ? 'Certified' : 'Standard'} tier) —{' '}
+              {effectiveSplit.advancePct}% advance / {effectiveSplit.remainderPct}% remainder /{' '}
+              {effectiveSplit.commissionPct}% commission.
+            </>
+          )}
+        </p>
+        <div className="mt-3 flex flex-wrap items-end gap-3">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs uppercase text-[#8A8073]">Advance %</label>
+            <input
+              type="number"
+              min={0}
+              max={100}
+              value={commissionDraft.advancePct}
+              onChange={(e) =>
+                setCommissionDraft((prev) => ({ ...prev, advancePct: e.target.value }))
+              }
+              className="w-24 rounded-[10px] border border-[rgba(18,33,29,0.14)] px-3 py-2 text-sm"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs uppercase text-[#8A8073]">Remainder %</label>
+            <input
+              type="number"
+              min={0}
+              max={100}
+              value={commissionDraft.remainderPct}
+              onChange={(e) =>
+                setCommissionDraft((prev) => ({ ...prev, remainderPct: e.target.value }))
+              }
+              className="w-24 rounded-[10px] border border-[rgba(18,33,29,0.14)] px-3 py-2 text-sm"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs uppercase text-[#8A8073]">Commission %</label>
+            <input
+              type="number"
+              min={0}
+              max={100}
+              value={commissionDraft.commissionPct}
+              onChange={(e) =>
+                setCommissionDraft((prev) => ({ ...prev, commissionPct: e.target.value }))
+              }
+              className="w-24 rounded-[10px] border border-[rgba(18,33,29,0.14)] px-3 py-2 text-sm"
+            />
+          </div>
+          <button
+            onClick={saveCommissionOverride}
+            disabled={commissionBusy}
+            className="rounded-full bg-paprika-dim px-4 py-2 text-sm font-semibold text-white disabled:opacity-65"
+          >
+            {commissionBusy ? 'Saving…' : 'Set override'}
+          </button>
+          {customPcts.advancePct != null && (
+            <button
+              onClick={clearCommissionOverride}
+              disabled={commissionBusy}
+              className="rounded-full border border-red-700/30 px-4 py-2 text-sm font-semibold text-red-700 disabled:opacity-65"
+            >
+              Clear override
+            </button>
+          )}
+        </div>
+        {commissionError && <p className="mt-2 text-sm text-red-700">{commissionError}</p>}
       </div>
 
       <div className="rounded-[20px] bg-paper p-6 text-ink shadow-[0_24px_60px_rgba(18,33,29,0.35)]">
@@ -443,7 +595,7 @@ export function VendorDetailPanel({
                 </div>
                 <p className="mt-1 text-xs text-[#5B6B63]">{incident.reason}</p>
                 <p className="mt-1 text-xs text-[#8A8073]">
-                  {new Date(incident.createdAt).toLocaleDateString()}
+                  {formatDate(incident.createdAt)}
                 </p>
               </div>
             ))}

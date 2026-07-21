@@ -1,3 +1,4 @@
+import { formatDate } from '@/lib/format';
 import type { Order, User } from '@/lib/types';
 
 const naira = (n: number) => `₦${n.toLocaleString('en-NG')}`;
@@ -30,7 +31,7 @@ function OrdersTable({ orders, emptyLabel }: { orders: Order[]; emptyLabel: stri
           {orders.map((order) => (
             <tr key={order.id} className="border-t border-[rgba(18,33,29,0.1)]">
               <td className="px-4 py-3 whitespace-nowrap text-[#5B6B63]">
-                {new Date(order.createdAt).toLocaleDateString()}
+                {formatDate(order.createdAt)}
               </td>
               <td className="px-4 py-3">
                 {[...new Set(order.items.map((item) => item.vendor?.name ?? item.vendorId))].join(
@@ -79,7 +80,7 @@ export function CustomerDetailPanel({ customer, orders }: { customer: User; orde
           </div>
           <div>
             <dt className="text-xs uppercase text-[#8A8073]">Joined</dt>
-            <dd>{new Date(customer.createdAt).toLocaleDateString()}</dd>
+            <dd>{formatDate(customer.createdAt)}</dd>
           </div>
         </dl>
       </div>

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiFetch, ApiError } from '@/lib/api';
 import { uploadVendorDocument } from '@/lib/cloudinary-upload';
+import { formatDate } from '@/lib/format';
 import type { VendorWalkthrough } from '@/lib/types';
 
 const STATUS_LABEL: Record<string, string> = {
@@ -75,7 +76,7 @@ export function WalkthroughPanel({
                   {STATUS_LABEL[w.status]}
                 </span>
                 <span className="text-xs text-[#8A8073]">
-                  {new Date(w.createdAt).toLocaleDateString()}
+                  {formatDate(w.createdAt)}
                 </span>
               </div>
               {w.reviewerNote && (

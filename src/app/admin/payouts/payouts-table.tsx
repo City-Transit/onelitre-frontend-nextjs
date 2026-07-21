@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { formatDate } from '@/lib/format';
 import type { Payout } from '@/lib/types';
 
 const naira = (n: number) => `₦${n.toLocaleString('en-NG')}`;
@@ -75,7 +76,7 @@ export function PayoutsTable({
                   </button>
                 ) : (
                   <span className="text-xs text-[#8A8073]">
-                    {payout.paidAt && new Date(payout.paidAt).toLocaleDateString()}
+                    {payout.paidAt && formatDate(payout.paidAt)}
                   </span>
                 )}
               </td>

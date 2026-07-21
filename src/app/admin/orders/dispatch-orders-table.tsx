@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { apiFetch, ApiError } from '@/lib/api';
 import { uploadDispatchPhoto } from '@/lib/cloudinary-upload';
+import { formatDate } from '@/lib/format';
 import type { Order } from '@/lib/types';
 
 const naira = (n: number) => `₦${n.toLocaleString('en-NG')}`;
@@ -176,7 +177,7 @@ export function DispatchOrdersTable({ initialOrders }: { initialOrders: Order[] 
           {orders.map((order) => (
             <tr key={order.id} className="border-t border-[rgba(18,33,29,0.1)]">
               <td className="px-6 py-4 whitespace-nowrap text-[#5B6B63]">
-                {new Date(order.createdAt).toLocaleDateString()}
+                {formatDate(order.createdAt)}
               </td>
               <td className="px-6 py-4">
                 <div>{order.deliveryAddress}</div>
@@ -316,7 +317,7 @@ export function DispatchOrdersTable({ initialOrders }: { initialOrders: Order[] 
                         }`}
                       >
                         Dispute {order.disputeOutcome} — resolved{' '}
-                        {new Date(order.disputeResolvedAt).toLocaleDateString()}
+                        {formatDate(order.disputeResolvedAt)}
                       </span>
                     ) : order.disputeRaisedAt ? (
                       <div className="flex flex-col items-end gap-1.5">

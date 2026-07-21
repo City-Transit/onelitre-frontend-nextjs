@@ -1,3 +1,4 @@
+import { formatDate } from '@/lib/format';
 import type { Order, OrderStatus } from '@/lib/types';
 
 const naira = (n: number) => `₦${n.toLocaleString('en-NG')}`;
@@ -28,7 +29,7 @@ export function MyOrders({ orders }: { orders: Order[] }) {
       {orders.map((order) => (
         <div key={order.id} className="rounded-[10px] border border-[rgba(18,33,29,0.14)] p-5">
           <div className="flex items-center justify-between">
-            <div className="font-semibold">{new Date(order.createdAt).toLocaleDateString()}</div>
+            <div className="font-semibold">{formatDate(order.createdAt)}</div>
             <span className="rounded-full bg-paper-dim px-3 py-1 text-xs font-semibold">
               {STATUS_LABEL[order.status]}
             </span>

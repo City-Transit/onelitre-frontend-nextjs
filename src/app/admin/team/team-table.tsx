@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { formatDate } from '@/lib/format';
 import type { User } from '@/lib/types';
 
 const ROLE_LABEL: Record<string, string> = {
@@ -81,7 +82,7 @@ export function TeamTable({
                   </span>
                 </td>
                 <td className="px-6 py-4 font-mono text-xs text-[#5B6B63]">
-                  {new Date(member.createdAt).toLocaleDateString()}
+                  {formatDate(member.createdAt)}
                 </td>
                 {canDeactivate && (
                   <td className="px-6 py-4 text-right">

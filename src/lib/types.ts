@@ -58,13 +58,15 @@ export interface Vendor {
   estimatedPrepMinutes?: number | null;
   contractAcceptedAt?: string | null;
   contractDeclinedAt?: string | null;
+  contractSignatureName?: string | null;
+  contractSignedVersion?: string | null;
   status?: VendorStatus;
   ownerId?: string | null;
   meals: Meal[];
   ratingAverage?: number | null;
   ratingCount?: number;
   profileComplete?: boolean;
-  /** Set once CAC + food safety are both verified — unlocks the higher advance rate. NIN/BVN are a separate onboarding requirement, not part of this badge. */
+  /** Set once CAC + food safety are both verified — unlocks the higher advance rate. NIN is a separate onboarding requirement, not part of this badge. */
   certifiedAt?: string | null;
   payoutBankCode?: string | null;
   payoutAccountNumber?: string | null;
@@ -74,9 +76,21 @@ export interface Vendor {
   lastActiveAt?: string | null;
   /** Set once 60+ days dormant — clears (and requires re-verification) once activity resumes. */
   dormancyRiskAt?: string | null;
+  /** Custom-negotiated payout split — all three set together overrides the standard/certified default. */
+  customAdvancePct?: number | null;
+  customRemainderPct?: number | null;
+  customCommissionPct?: number | null;
+  /** The split actually in effect for this vendor right now — custom override, else certified/standard. */
+  effectiveSplit: EffectiveSplit;
 }
 
-export type VendorDocumentType = 'nin' | 'bvn' | 'cac' | 'food_safety';
+export interface EffectiveSplit {
+  advancePct: number;
+  remainderPct: number;
+  commissionPct: number;
+}
+
+export type VendorDocumentType = 'nin' | 'cac' | 'food_safety';
 export type VendorDocumentStatus = 'pending' | 'verified' | 'rejected';
 
 export interface VendorDocument {
