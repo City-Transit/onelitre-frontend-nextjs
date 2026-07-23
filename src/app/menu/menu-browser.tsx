@@ -4,7 +4,12 @@ import { useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Vendor } from '@/lib/types';
-import { CUISINE_OPTIONS, PREP_TIME_OPTIONS } from '@/lib/vendor-options';
+import {
+  CUISINE_OPTIONS,
+  DELIVERY_TIME_BUCKETS,
+  getDeliveryTimeBucket,
+  getEstimatedDeliveryMinutes,
+} from '@/lib/vendor-options';
 
 const GRADIENTS = [
   'from-paprika/70 to-bg',
@@ -36,7 +41,7 @@ export function MenuBrowser({ vendors }: { vendors: Vendor[] }) {
   const [cuisine, setCuisine] = useState('');
   const [priceBucket, setPriceBucket] = useState('');
   const [minRating, setMinRating] = useState('');
-  const [maxPrepMinutes, setMaxPrepMinutes] = useState('');
+  const [deliveryTimeBucket, setDeliveryTimeBucket] = useState('');
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -66,17 +71,19 @@ export function MenuBrowser({ vendors }: { vendors: Vendor[] }) {
         if (!vendor.ratingAverage || vendor.ratingAverage < (bucket?.min ?? 0)) return false;
       }
 
-      if (maxPrepMinutes) {
-        if (
-          vendor.estimatedPrepMinutes == null ||
-          vendor.estimatedPrepMinutes > Number(maxPrepMinutes)
-        )
-          return false;
+      if (deliveryTimeBucket) {
+        const totalMinutes = getEstimatedDeliveryMinutes(vendor);
+        const vendorBucket = totalMinutes == null ? null : getDeliveryTimeBucket(totalMinutes);
+        const selectedRank = DELIVERY_TIME_BUCKETS.findIndex((b) => b.value === deliveryTimeBucket);
+        const vendorRank = vendorBucket
+          ? DELIVERY_TIME_BUCKETS.findIndex((b) => b.value === vendorBucket.value)
+          : -1;
+        if (vendorRank === -1 || vendorRank > selectedRank) return false;
       }
 
       return true;
     });
-  }, [vendors, query, cuisine, priceBucket, minRating, maxPrepMinutes]);
+  }, [vendors, query, cuisine, priceBucket, minRating, deliveryTimeBucket]);
 
   return (
     <>
@@ -128,14 +135,14 @@ export function MenuBrowser({ vendors }: { vendors: Vendor[] }) {
           ))}
         </select>
         <select
-          value={maxPrepMinutes}
-          onChange={(e) => setMaxPrepMinutes(e.target.value)}
+          value={deliveryTimeBucket}
+          onChange={(e) => setDeliveryTimeBucket(e.target.value)}
           className={selectClass}
         >
           <option value="">Any delivery time</option>
-          {PREP_TIME_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
+          {DELIVERY_TIME_BUCKETS.map((b) => (
+            <option key={b.value} value={b.value}>
+              {b.label}
             </option>
           ))}
         </select>

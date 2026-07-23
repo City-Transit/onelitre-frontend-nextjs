@@ -56,6 +56,7 @@ export interface Vendor {
   contactPhone?: string | null;
   cuisines?: string[] | null;
   estimatedPrepMinutes?: number | null;
+  estimatedDeliveryMinutes?: number | null;
   contractAcceptedAt?: string | null;
   contractDeclinedAt?: string | null;
   contractSignatureName?: string | null;

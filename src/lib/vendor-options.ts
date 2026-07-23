@@ -14,3 +14,49 @@ export const PREP_TIME_OPTIONS = [
   { value: 60, label: '45–60 min' },
   { value: 90, label: '60–90 min' },
 ];
+
+/** Vendor's own dispatch/logistics estimate — combined with prep time to bucket the
+ * customer-facing "delivery time" (see DELIVERY_TIME_BUCKETS below). */
+export const DELIVERY_TIME_OPTIONS = [
+  { value: 60, label: 'Under 1 hour' },
+  { value: 180, label: '1–3 hours' },
+  { value: 360, label: '3–6 hours' },
+  { value: 720, label: '6–12 hours' },
+  { value: 1440, label: '12–24 hours' },
+];
+
+/** Padding added on top of prep + dispatch time before bucketing, so the bucket we show
+ * customers doesn't under-promise against the vendor's own (optimistic) estimates. */
+export const DELIVERY_TIME_BUFFER_MINUTES = 60;
+
+/** Customer-facing "delivery time" buckets — what's shown/filtered on the menu browser.
+ * Ordered ascending; `maxMinutes` is the upper bound of prep + dispatch + buffer for that bucket. */
+export const DELIVERY_TIME_BUCKETS = [
+  { value: 'under-3h', label: 'Under 3 hours', maxMinutes: 180 },
+  { value: '3-6h', label: '3-6 hours', maxMinutes: 360 },
+  { value: '6-12h', label: '6-12 hours', maxMinutes: 720 },
+  { value: '12-24h', label: '12-24hours', maxMinutes: 1440 },
+  { value: 'up-to-48h', label: 'Up to 48 hours', maxMinutes: 2880 },
+];
+
+/** Total estimated minutes (prep + vendor's dispatch estimate + buffer), or null if either
+ * half hasn't been set by the vendor yet. */
+export function getEstimatedDeliveryMinutes(vendor: {
+  estimatedPrepMinutes?: number | null;
+  estimatedDeliveryMinutes?: number | null;
+}): number | null {
+  if (vendor.estimatedPrepMinutes == null || vendor.estimatedDeliveryMinutes == null) {
+    return null;
+  }
+  return (
+    vendor.estimatedPrepMinutes +
+    vendor.estimatedDeliveryMinutes +
+    DELIVERY_TIME_BUFFER_MINUTES
+  );
+}
+
+/** Which customer-facing bucket a total estimated-minutes value falls into, or null if it
+ * exceeds even the widest bucket. */
+export function getDeliveryTimeBucket(totalMinutes: number) {
+  return DELIVERY_TIME_BUCKETS.find((b) => totalMinutes <= b.maxMinutes) ?? null;
+}
