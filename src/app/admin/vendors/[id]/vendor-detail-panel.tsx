@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiFetch, ApiError } from '@/lib/api';
+import { API_BASE_URL } from '@/lib/api-base-url';
 import { formatDate } from '@/lib/format';
 import { WALKTHROUGH_CHECKLIST_ITEMS } from '@/lib/vendor-walkthrough-checklist';
 import type {
@@ -14,8 +15,6 @@ import type {
   VendorOrderGroup,
   VendorWalkthrough,
 } from '@/lib/types';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 const DOCUMENT_LABEL: Record<VendorDocumentType, string> = {
   nin: 'NIN',

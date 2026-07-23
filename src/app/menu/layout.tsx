@@ -1,11 +1,10 @@
 import { SiteHeader } from '@/components/site-header';
 import { serverApiFetch } from '@/lib/server-api';
+import { API_BASE_URL } from '@/lib/api-base-url';
 import { CartProvider } from './cart-context';
 import { CartBar } from './cart-bar';
 import { Checkout } from './checkout';
 import type { Vendor } from '@/lib/types';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 async function getVendors(): Promise<Vendor[]> {
   const res = await fetch(`${API_BASE_URL}/vendors`, { cache: 'no-store' });

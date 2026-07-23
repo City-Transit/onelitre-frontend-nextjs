@@ -3,12 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/api';
+import { API_BASE_URL } from '@/lib/api-base-url';
 import { uploadVendorDocument } from '@/lib/cloudinary-upload';
 import { formatDate } from '@/lib/format';
 import { buildContractSections } from '@/lib/vendor-contract';
 import type { Vendor, VendorDocument, VendorDocumentType } from '@/lib/types';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 const NUMBER_DOCUMENT_TYPES: { type: VendorDocumentType; label: string; placeholder: string }[] = [
   { type: 'nin', label: 'NIN', placeholder: '12345678901' },
