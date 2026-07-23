@@ -1,5 +1,6 @@
 import { serverApiFetch } from '@/lib/server-api';
 import { Pagination } from '@/components/pagination';
+import { formatDateTime } from '@/lib/format';
 import type { AuditLogEntry, Paginated } from '@/lib/types';
 
 export default async function AdminActivityPage({
@@ -52,7 +53,7 @@ export default async function AdminActivityPage({
                   <td className="px-6 py-4 text-[#5B6B63]">{entry.actorRole}</td>
                   <td className="px-6 py-4 text-[#5B6B63]">{entry.entityType}</td>
                   <td className="px-6 py-4 font-mono text-xs text-[#5B6B63]">
-                    {new Date(entry.createdAt).toLocaleString()}
+                    {formatDateTime(entry.createdAt)}
                   </td>
                 </tr>
               ))}

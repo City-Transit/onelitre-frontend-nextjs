@@ -8,7 +8,9 @@ const ADMIN_UP: Role[] = ['admin', 'super_admin'];
 
 const TABS = [
   { href: '/admin/vendors', label: 'Vendors' },
+  { href: '/admin/menu-approvals', label: 'Menu Approvals' },
   { href: '/admin/orders', label: 'Orders' },
+  { href: '/admin/payouts', label: 'Payouts' },
   { href: '/admin/customers', label: 'Customers' },
   { href: '/admin/activity', label: 'Activity', minRole: ADMIN_UP },
   { href: '/admin/team', label: 'Team', minRole: ADMIN_UP },

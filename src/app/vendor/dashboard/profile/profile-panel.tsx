@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/api';
 import { COMING_SOON_CITIES, LAGOS_AREAS, LIVE_CITY } from '@/lib/locations';
-import { CUISINE_OPTIONS, PREP_TIME_OPTIONS } from '@/lib/vendor-options';
+import { CUISINE_OPTIONS, DELIVERY_TIME_OPTIONS, PREP_TIME_OPTIONS } from '@/lib/vendor-options';
 import type { Vendor } from '@/lib/types';
 
 const inputClass =
@@ -23,15 +23,12 @@ export function ProfilePanel({ vendor }: { vendor: Vendor }) {
   const [area, setArea] = useState(parsed.area);
   const [address, setAddress] = useState(vendor.address ?? '');
   const [contactPhone, setContactPhone] = useState(vendor.contactPhone ?? '');
-  const [isRegisteredBusiness, setIsRegisteredBusiness] = useState<'yes' | 'no'>(
-    vendor.isRegisteredBusiness ? 'yes' : 'no',
-  );
-  const [registrationNumber, setRegistrationNumber] = useState(
-    vendor.registrationNumber ?? '',
-  );
   const [cuisines, setCuisines] = useState<string[]>(vendor.cuisines ?? []);
   const [estimatedPrepMinutes, setEstimatedPrepMinutes] = useState(
     vendor.estimatedPrepMinutes ? String(vendor.estimatedPrepMinutes) : '',
+  );
+  const [estimatedDeliveryMinutes, setEstimatedDeliveryMinutes] = useState(
+    vendor.estimatedDeliveryMinutes ? String(vendor.estimatedDeliveryMinutes) : '',
   );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,12 +50,12 @@ export function ProfilePanel({ vendor }: { vendor: Vendor }) {
           area: area ? `${area}, ${city}` : undefined,
           address: address || undefined,
           contactPhone: contactPhone || undefined,
-          isRegisteredBusiness: isRegisteredBusiness === 'yes',
-          registrationNumber:
-            isRegisteredBusiness === 'yes' ? registrationNumber || undefined : undefined,
           cuisines,
           estimatedPrepMinutes: estimatedPrepMinutes
             ? Number(estimatedPrepMinutes)
+            : undefined,
+          estimatedDeliveryMinutes: estimatedDeliveryMinutes
+            ? Number(estimatedDeliveryMinutes)
             : undefined,
         }),
       });
@@ -162,27 +159,24 @@ export function ProfilePanel({ vendor }: { vendor: Vendor }) {
       </div>
 
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-semibold">Is your business registered?</label>
+        <label className="text-sm font-semibold">Typical dispatch/delivery time</label>
         <select
-          value={isRegisteredBusiness}
-          onChange={(e) => setIsRegisteredBusiness(e.target.value as 'yes' | 'no')}
+          value={estimatedDeliveryMinutes}
+          onChange={(e) => setEstimatedDeliveryMinutes(e.target.value)}
           className={inputClass}
         >
-          <option value="no">No</option>
-          <option value="yes">Yes</option>
+          <option value="">Select delivery time</option>
+          {DELIVERY_TIME_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
         </select>
+        <p className="text-xs text-muted">
+          How long dispatch/delivery usually takes after a meal is ready — combined with your
+          prep time, this is what customers see as the estimated delivery time.
+        </p>
       </div>
-      {isRegisteredBusiness === 'yes' && (
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-semibold">Registration number (CAC/BN)</label>
-          <input
-            placeholder="RC1234567"
-            value={registrationNumber}
-            onChange={(e) => setRegistrationNumber(e.target.value)}
-            className={inputClass}
-          />
-        </div>
-      )}
 
       {error && <p className="text-sm text-red-700">{error}</p>}
       {saved && !error && <p className="text-sm text-green-700">Profile saved.</p>}

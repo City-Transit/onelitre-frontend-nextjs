@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { serverApiFetch } from '@/lib/server-api';
 import { Pagination } from '@/components/pagination';
+import { formatDateTime } from '@/lib/format';
 import type { AuditLogEntry, Paginated } from '@/lib/types';
 
 export default async function VendorActivityPage({
@@ -45,7 +46,7 @@ export default async function VendorActivityPage({
                   </td>
                   <td className="px-6 py-4 text-[#5B6B63]">{entry.entityType}</td>
                   <td className="px-6 py-4 font-mono text-xs text-[#5B6B63]">
-                    {new Date(entry.createdAt).toLocaleString()}
+                    {formatDateTime(entry.createdAt)}
                   </td>
                 </tr>
               ))}

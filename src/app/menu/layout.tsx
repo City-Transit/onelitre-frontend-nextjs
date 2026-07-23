@@ -1,4 +1,5 @@
 import { SiteHeader } from '@/components/site-header';
+import { serverApiFetch } from '@/lib/server-api';
 import { CartProvider } from './cart-context';
 import { CartBar } from './cart-bar';
 import { Checkout } from './checkout';
@@ -12,11 +13,18 @@ async function getVendors(): Promise<Vendor[]> {
   return res.json();
 }
 
+async function getCurrentUserId(): Promise<string | null> {
+  const res = await serverApiFetch('/auth/me');
+  if (!res.ok) return null;
+  const user: { id: string } = await res.json();
+  return user.id;
+}
+
 export default async function MenuLayout({ children }: { children: React.ReactNode }) {
-  const vendors = await getVendors();
+  const [vendors, userId] = await Promise.all([getVendors(), getCurrentUserId()]);
 
   return (
-    <CartProvider>
+    <CartProvider userId={userId}>
       <SiteHeader />
 
       {children}
