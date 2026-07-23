@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { apiFetch } from '@/lib/api';
 import type { Vendor } from '@/lib/types';
 
@@ -8,6 +9,8 @@ const STATUS_LABEL: Record<string, string> = {
   pending: 'Pending',
   approved: 'Approved',
   suspended: 'Suspended',
+  paused: 'Paused',
+  offboarded: 'Offboarded',
 };
 
 export function VendorsTable({
@@ -54,15 +57,21 @@ export function VendorsTable({
         <tbody>
           {vendors.map((vendor) => (
             <tr key={vendor.id} className="border-t border-[rgba(18,33,29,0.1)]">
-              <td className="px-6 py-4 font-semibold">{vendor.name}</td>
+              <td className="px-6 py-4 font-semibold">
+                <Link href={`/admin/vendors/${vendor.id}`} className="hover:underline">
+                  {vendor.name}
+                </Link>
+              </td>
               <td className="px-6 py-4 text-[#5B6B63]">{vendor.area}</td>
               <td className="px-6 py-4 text-[#5B6B63]">{vendor.address ?? '—'}</td>
               <td className="px-6 py-4 text-[#5B6B63]">
                 <div>{vendor.contactPhone ?? '—'}</div>
                 <div className="mt-1 text-xs">
-                  {vendor.isRegisteredBusiness
-                    ? `Registered${vendor.registrationNumber ? ` · ${vendor.registrationNumber}` : ''}`
-                    : 'Not registered'}
+                  {vendor.contractAcceptedAt
+                    ? 'Contract accepted'
+                    : vendor.contractDeclinedAt
+                      ? 'Contract declined'
+                      : 'Contract pending'}
                 </div>
               </td>
               <td className="px-6 py-4">
@@ -73,6 +82,12 @@ export function VendorsTable({
               <td className="px-6 py-4">
                 {canManage ? (
                   <div className="flex justify-end gap-2">
+                    <Link
+                      href={`/admin/vendors/${vendor.id}`}
+                      className="rounded-full border border-[rgba(18,33,29,0.2)] px-4 py-2 text-xs font-semibold"
+                    >
+                      Review
+                    </Link>
                     {vendor.status === 'pending' && (
                       <>
                         <button
@@ -111,7 +126,14 @@ export function VendorsTable({
                     )}
                   </div>
                 ) : (
-                  <div className="text-right text-xs text-[#8A8073]">View only</div>
+                  <div className="flex justify-end">
+                    <Link
+                      href={`/admin/vendors/${vendor.id}`}
+                      className="rounded-full border border-[rgba(18,33,29,0.2)] px-4 py-2 text-xs font-semibold"
+                    >
+                      Review
+                    </Link>
+                  </div>
                 )}
               </td>
             </tr>
