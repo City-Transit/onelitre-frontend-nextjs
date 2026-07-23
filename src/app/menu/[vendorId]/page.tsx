@@ -2,9 +2,8 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { QtyStepper } from '../qty-stepper';
 import { Reviews } from './reviews';
+import { API_BASE_URL } from '@/lib/api-base-url';
 import type { Vendor } from '@/lib/types';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 async function getVendor(id: string): Promise<Vendor | null> {
   const res = await fetch(`${API_BASE_URL}/vendors/${id}`, { cache: 'no-store' });

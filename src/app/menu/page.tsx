@@ -1,7 +1,6 @@
 import { MenuBrowser } from './menu-browser';
+import { API_BASE_URL } from '@/lib/api-base-url';
 import type { Vendor } from '@/lib/types';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 async function getVendors(): Promise<Vendor[]> {
   const res = await fetch(`${API_BASE_URL}/vendors`, { cache: 'no-store' });
