@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/api';
+import { clearSessionTokens, getRefreshToken } from '@/lib/session';
 
 export default function LogoutButton() {
   const router = useRouter();
@@ -10,7 +11,11 @@ export default function LogoutButton() {
 
   async function handleLogout() {
     setLoggingOut(true);
-    await apiFetch('/auth/logout', { method: 'POST' });
+    await apiFetch('/auth/logout', {
+      method: 'POST',
+      body: JSON.stringify({ refreshToken: getRefreshToken() }),
+    }).catch(() => {});
+    clearSessionTokens();
     router.push('/login');
     router.refresh();
   }

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { apiFetch, ApiError } from '@/lib/api';
+import { setSessionTokens } from '@/lib/session';
 import type { User } from '@/lib/types';
 
 const DASHBOARD_BY_ROLE: Record<User['role'], string> = {
@@ -30,10 +31,12 @@ export function LoginForm() {
     setError(null);
     setSubmitting(true);
     try {
-      const user: User = await apiFetch('/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({ identifier, password }),
-      });
+      const { user, accessToken, refreshToken }: { user: User; accessToken: string; refreshToken: string } =
+        await apiFetch('/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ identifier, password }),
+        });
+      setSessionTokens(accessToken, refreshToken);
       router.push(DASHBOARD_BY_ROLE[user.role]);
       router.refresh();
     } catch (err) {
