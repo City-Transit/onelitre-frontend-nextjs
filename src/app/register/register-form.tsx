@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { apiFetch, ApiError } from '@/lib/api';
+import { setSessionTokens } from '@/lib/session';
 
 type RegisterRole = 'customer' | 'vendor';
 
@@ -34,7 +35,7 @@ export function RegisterForm() {
 
     setSubmitting(true);
     try {
-      await apiFetch('/auth/register', {
+      const { accessToken, refreshToken } = await apiFetch('/auth/register', {
         method: 'POST',
         body: JSON.stringify(
           role === 'vendor'
@@ -42,6 +43,7 @@ export function RegisterForm() {
             : { role, firstName, lastName, phone, email, password },
         ),
       });
+      setSessionTokens(accessToken, refreshToken);
       router.push(role === 'vendor' ? '/vendor/dashboard' : '/dashboard');
       router.refresh();
     } catch (err) {
