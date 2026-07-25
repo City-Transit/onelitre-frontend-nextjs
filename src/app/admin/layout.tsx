@@ -10,6 +10,8 @@ const ADMIN_SIDE_ROLES: User['role'][] = ['staff', 'supervisor', 'admin', 'super
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const res = await serverApiFetch('/auth/me');
   if (!res.ok) {
+    const body = await res.text().catch(() => '<unreadable>');
+    console.error('[admin/layout] /auth/me failed', res.status, body);
     redirect('/login');
   }
   const user: User = await res.json();
