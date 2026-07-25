@@ -31,15 +31,20 @@ export function LoginForm() {
     setError(null);
     setSubmitting(true);
     try {
+      console.log('[login] submitting');
       const { user, accessToken, refreshToken }: { user: User; accessToken: string; refreshToken: string } =
         await apiFetch('/auth/login', {
           method: 'POST',
           body: JSON.stringify({ identifier, password }),
         });
+      console.log('[login] apiFetch resolved', { role: user?.role, hasAccessToken: !!accessToken, hasRefreshToken: !!refreshToken });
       setSessionTokens(accessToken, refreshToken);
+      console.log('[login] tokens stored, pushing to', DASHBOARD_BY_ROLE[user.role]);
       router.push(DASHBOARD_BY_ROLE[user.role]);
       router.refresh();
+      console.log('[login] router.push + refresh called');
     } catch (err) {
+      console.error('[login] failed', err);
       setError(
         err instanceof ApiError && (err.status === 401 || err.status === 400)
           ? `Invalid ${isVendor ? 'email' : 'phone number'} or password.`
