@@ -9,16 +9,11 @@ const ADMIN_SIDE_ROLES: User['role'][] = ['staff', 'supervisor', 'admin', 'super
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const res = await serverApiFetch('/auth/me');
-  console.log('[admin/layout] /auth/me status', res.status);
   if (!res.ok) {
-    const body = await res.text().catch(() => '<unreadable>');
-    console.error('[admin/layout] /auth/me failed', res.status, body);
     redirect('/login');
   }
   const user: User = await res.json();
-  console.log('[admin/layout] /auth/me user role', user.role);
   if (!ADMIN_SIDE_ROLES.includes(user.role)) {
-    console.error('[admin/layout] role not admin-side', user.role);
     redirect('/login');
   }
 
