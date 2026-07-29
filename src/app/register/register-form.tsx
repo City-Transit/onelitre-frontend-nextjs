@@ -44,7 +44,7 @@ export function RegisterForm() {
         ),
       });
       setSessionTokens(accessToken, refreshToken);
-      router.push(role === 'vendor' ? '/vendor/dashboard' : '/dashboard');
+      router.push(role === 'vendor' ? '/vendor/dashboard' : '/menu');
       router.refresh();
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {

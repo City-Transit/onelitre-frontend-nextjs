@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Fraunces, Space_Mono, Manrope } from "next/font/google";
 import "./globals.css";
+import { serverApiFetch } from "@/lib/server-api";
+import { CartProvider } from "./menu/cart-context";
+import { CartDrawer } from "@/components/cart-drawer";
 
 const fraunces = Fraunces({
   variable: "--font-fraunces",
@@ -27,17 +30,31 @@ export const metadata: Metadata = {
     "Bulk, freezer-ready meals from vetted vendors near you — home-cooked quality without the time or skill it takes to make it yourself.",
 };
 
-export default function RootLayout({
+async function getCurrentUserId(): Promise<string | null> {
+  const res = await serverApiFetch('/auth/me');
+  if (!res.ok) return null;
+  const user: { id: string } = await res.json();
+  return user.id;
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const userId = await getCurrentUserId();
+
   return (
     <html
       lang="en"
       className={`${fraunces.variable} ${spaceMono.variable} ${manrope.variable} h-full`}
     >
-      <body className="flex min-h-full flex-col bg-bg text-paper antialiased">{children}</body>
+      <body className="flex min-h-full flex-col bg-bg text-paper antialiased">
+        <CartProvider userId={userId}>
+          {children}
+          <CartDrawer />
+        </CartProvider>
+      </body>
     </html>
   );
 }

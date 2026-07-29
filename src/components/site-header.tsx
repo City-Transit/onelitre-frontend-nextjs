@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { serverApiFetch } from '@/lib/server-api';
+import { BasketButton } from './basket-button';
 import type { User } from '@/lib/types';
 
 const DASHBOARD_BY_ROLE: Record<User['role'], string> = {
@@ -26,6 +27,7 @@ export async function SiteHeader() {
           <Link href="/menu" className="text-paper transition-colors hover:text-frost">
             View menu
           </Link>
+          <BasketButton />
           {user ? (
             <Link
               href={DASHBOARD_BY_ROLE[user.role]}

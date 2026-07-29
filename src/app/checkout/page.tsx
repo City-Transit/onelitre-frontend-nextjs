@@ -1,12 +1,21 @@
 import { SiteHeader } from '@/components/site-header';
+import { API_BASE_URL } from '@/lib/api-base-url';
+import { CheckoutForm } from './checkout-form';
+import type { Vendor } from '@/lib/types';
 
-export default function MenuLayout({ children }: { children: React.ReactNode }) {
+async function getVendors(): Promise<Vendor[]> {
+  const res = await fetch(`${API_BASE_URL}/vendors`, { cache: 'no-store' });
+  if (!res.ok) return [];
+  return res.json();
+}
+
+export default async function CheckoutPage() {
+  const vendors = await getVendors();
+
   return (
     <>
       <SiteHeader />
-
-      {children}
-
+      <CheckoutForm vendors={vendors} />
       <footer className="border-t border-line bg-bg-alt px-6 py-10">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-5">
           <div className="flex items-center gap-2.5 font-serif text-[17px] font-semibold">
