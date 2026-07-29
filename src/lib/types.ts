@@ -148,10 +148,13 @@ export interface Order {
   customerId: string;
   deliveryAddress: string;
   deliveryArea?: string | null;
+  area?: string | null;
   deliveryDate: string;
   deliveryTimeSlot: string;
   notes?: string | null;
   subtotal: number;
+  deliveryFee: number;
+  total: number;
   status: OrderStatus;
   paymentStatus: OrderPaymentStatus;
   deliveryConfirmedAt?: string | null;
@@ -164,6 +167,13 @@ export interface Order {
   disputeOutcome?: DisputeOutcome | null;
   createdAt: string;
   items: OrderItem[];
+}
+
+export interface DeliveryFee {
+  id: string;
+  area: string;
+  feeNaira: number;
+  updatedAt: string;
 }
 
 export type PayoutType = 'advance' | 'remainder';

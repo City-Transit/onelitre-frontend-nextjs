@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { apiFetch, ApiError } from '@/lib/api';
 import { useCart } from '../menu/cart-context';
 import { COMING_SOON_CITIES, LAGOS_AREAS, LIVE_CITY } from '@/lib/locations';
-import type { Vendor } from '@/lib/types';
+import type { DeliveryFee, Vendor } from '@/lib/types';
 
 const naira = (n: number) => `₦${n.toLocaleString('en-NG')}`;
 
@@ -25,10 +25,19 @@ export function CheckoutForm({ vendors }: { vendors: Vendor[] }) {
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [feesByArea, setFeesByArea] = useState<Map<string, number>>(new Map());
 
   useEffect(() => {
     if (count === 0) router.replace('/menu');
   }, [count, router]);
+
+  useEffect(() => {
+    apiFetch('/delivery-fees')
+      .then((fees: DeliveryFee[]) => {
+        setFeesByArea(new Map(fees.map((f) => [f.area, f.feeNaira])));
+      })
+      .catch(() => {});
+  }, []);
 
   const sizesById = new Map(
     vendors.flatMap((v) => v.meals.flatMap((m) => m.sizes.map((s) => [s.id, { size: s, meal: m }] as const))),
@@ -42,7 +51,9 @@ export function CheckoutForm({ vendors }: { vendors: Vendor[] }) {
     })
     .filter((line): line is NonNullable<typeof line> => line !== null);
 
-  const total = lines.reduce((sum, line) => sum + line.size.price * line.quantity, 0);
+  const subtotal = lines.reduce((sum, line) => sum + line.size.price * line.quantity, 0);
+  const deliveryFee = feesByArea.get(area) ?? 0;
+  const grandTotal = subtotal + deliveryFee;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -54,6 +65,7 @@ export function CheckoutForm({ vendors }: { vendors: Vendor[] }) {
         body: JSON.stringify({
           deliveryAddress,
           deliveryArea: `${area}, ${city}`,
+          area,
           deliveryDate,
           deliveryTimeSlot,
           notes: notes || undefined,
@@ -91,9 +103,17 @@ export function CheckoutForm({ vendors }: { vendors: Vendor[] }) {
                 <span>{naira(line.size.price * line.quantity)}</span>
               </div>
             ))}
-            <div className="mt-2 flex justify-between border-t border-[rgba(18,33,29,0.14)] pt-3 font-semibold">
+            <div className="mt-2 flex justify-between border-t border-[rgba(18,33,29,0.14)] pt-3 text-sm">
+              <span>Subtotal</span>
+              <span>{naira(subtotal)}</span>
+            </div>
+            <div className="flex justify-between py-1 text-sm">
+              <span>Delivery fee{area ? '' : ' (select an area)'}</span>
+              <span>{naira(deliveryFee)}</span>
+            </div>
+            <div className="flex justify-between border-t border-[rgba(18,33,29,0.14)] pt-3 font-semibold">
               <span>Total</span>
-              <span>{naira(total)}</span>
+              <span>{naira(grandTotal)}</span>
             </div>
           </div>
 
