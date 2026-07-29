@@ -25,6 +25,11 @@ interface CartContextValue {
   setQty: (mealSizeId: string, qty: number, vendorId: string) => boolean;
   count: number;
   clear: () => void;
+  /** Drawer open state lives here (rather than a separate context) so any component — the header
+   * button, a "view basket" link, etc. — can open it without its own provider. */
+  isDrawerOpen: boolean;
+  openDrawer: () => void;
+  closeDrawer: () => void;
 }
 
 const EMPTY_STATE: CartState = { items: {}, vendorId: null };
@@ -66,6 +71,7 @@ export function CartProvider({
   children: React.ReactNode;
 }) {
   const [state, setState] = useState<CartState>(EMPTY_STATE);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   useEffect(() => {
     setState(readCart(userId));
@@ -112,7 +118,16 @@ export function CartProvider({
 
   return (
     <CartContext.Provider
-      value={{ cart: state.items, vendorId: state.vendorId, setQty, count, clear }}
+      value={{
+        cart: state.items,
+        vendorId: state.vendorId,
+        setQty,
+        count,
+        clear,
+        isDrawerOpen,
+        openDrawer: () => setIsDrawerOpen(true),
+        closeDrawer: () => setIsDrawerOpen(false),
+      }}
     >
       {children}
     </CartContext.Provider>

@@ -8,7 +8,7 @@ import { setSessionTokens } from '@/lib/session';
 import type { User } from '@/lib/types';
 
 const DASHBOARD_BY_ROLE: Record<User['role'], string> = {
-  customer: '/dashboard',
+  customer: '/menu',
   vendor: '/vendor/dashboard',
   staff: '/admin',
   supervisor: '/admin',

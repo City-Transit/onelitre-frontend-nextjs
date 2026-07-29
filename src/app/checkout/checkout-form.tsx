@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiFetch, ApiError } from '@/lib/api';
-import { useCart } from './cart-context';
+import { useCart } from '../menu/cart-context';
 import { COMING_SOON_CITIES, LAGOS_AREAS, LIVE_CITY } from '@/lib/locations';
 import type { Vendor } from '@/lib/types';
 
@@ -14,7 +14,7 @@ const TIME_SLOTS = ['9am-11am', '11am-1pm', '1pm-3pm', '3pm-5pm', '5pm-7pm'];
 const inputClass =
   'w-full rounded-[10px] border border-[rgba(18,33,29,0.14)] bg-paper-dim px-4 py-3 text-[15px] text-ink focus:border-paprika focus:bg-white focus:outline-none';
 
-export function Checkout({ vendors }: { vendors: Vendor[] }) {
+export function CheckoutForm({ vendors }: { vendors: Vendor[] }) {
   const router = useRouter();
   const { cart, count } = useCart();
   const [city, setCity] = useState(LIVE_CITY);
@@ -25,6 +25,10 @@ export function Checkout({ vendors }: { vendors: Vendor[] }) {
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (count === 0) router.replace('/menu');
+  }, [count, router]);
 
   const sizesById = new Map(
     vendors.flatMap((v) => v.meals.flatMap((m) => m.sizes.map((s) => [s.id, { size: s, meal: m }] as const))),
@@ -72,9 +76,9 @@ export function Checkout({ vendors }: { vendors: Vendor[] }) {
   if (count === 0) return null;
 
   return (
-    <section id="checkout" className="scroll-mt-24 bg-paper px-6 py-16 text-ink">
+    <section className="bg-paper px-6 py-16 text-ink">
       <div className="mx-auto max-w-2xl">
-        <h2 className="text-2xl font-semibold">Your order</h2>
+        <h1 className="text-2xl font-semibold">Your order</h1>
 
         <div className="mt-6 grid gap-6 md:grid-cols-2">
           <div className="rounded-[16px] border border-[rgba(18,33,29,0.14)] p-5">
