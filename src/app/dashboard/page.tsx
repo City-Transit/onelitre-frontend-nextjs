@@ -5,6 +5,7 @@ import { SiteHeader } from '@/components/site-header';
 import LogoutButton from './logout-button';
 import EditProfileForm from './edit-profile-form';
 import { MyOrders } from './my-orders';
+import { SubscriptionPanel } from './subscription-panel';
 
 export default async function DashboardPage() {
   const res = await serverApiFetch('/auth/me');
@@ -32,6 +33,7 @@ export default async function DashboardPage() {
         <div className="mt-8 rounded-[20px] bg-paper p-8 text-ink shadow-[0_24px_60px_rgba(18,33,29,0.35)]">
           <EditProfileForm user={user} />
         </div>
+        <SubscriptionPanel />
         <div className="mt-8">
           <h2 className="mb-4 text-xl text-paper">Your orders</h2>
           <div className="rounded-[20px] bg-paper p-8 text-ink shadow-[0_24px_60px_rgba(18,33,29,0.35)]">

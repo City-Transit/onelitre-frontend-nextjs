@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/api';
+import { LAGOS_AREAS } from '@/lib/locations';
 import type { User } from '@/lib/types';
 
 const inputClass =
@@ -13,6 +14,7 @@ export default function EditProfileForm({ user }: { user: User }) {
   const [firstName, setFirstName] = useState(user.firstName);
   const [lastName, setLastName] = useState(user.lastName);
   const [address, setAddress] = useState(user.address ?? '');
+  const [area, setArea] = useState(user.area ?? '');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -22,7 +24,7 @@ export default function EditProfileForm({ user }: { user: User }) {
     setSaved(false);
     await apiFetch('/users/me', {
       method: 'PATCH',
-      body: JSON.stringify({ firstName, lastName, address }),
+      body: JSON.stringify({ firstName, lastName, address, area: area || undefined }),
     });
     setSaving(false);
     setSaved(true);
@@ -66,6 +68,20 @@ export default function EditProfileForm({ user }: { user: User }) {
           onChange={(e) => setAddress(e.target.value)}
           className={inputClass}
         />
+      </div>
+      <div>
+        <label className="text-[14.5px] font-semibold">Area</label>
+        <select value={area} onChange={(e) => setArea(e.target.value)} className={inputClass}>
+          <option value="">Select an area</option>
+          {LAGOS_AREAS.map((a) => (
+            <option key={a} value={a}>
+              {a}
+            </option>
+          ))}
+        </select>
+        <p className="mt-1.5 text-xs text-[#8A8073]">
+          Saved here so checkout can pre-fill your delivery address and area automatically.
+        </p>
       </div>
       <div className="flex items-center gap-3">
         <button

@@ -1,6 +1,6 @@
 import { MenuBrowser } from './menu-browser';
 import { API_BASE_URL } from '@/lib/api-base-url';
-import type { Vendor } from '@/lib/types';
+import type { Badge, Vendor } from '@/lib/types';
 
 async function getVendors(): Promise<Vendor[]> {
   const res = await fetch(`${API_BASE_URL}/vendors`, { cache: 'no-store' });
@@ -8,8 +8,14 @@ async function getVendors(): Promise<Vendor[]> {
   return res.json();
 }
 
+async function getBadges(): Promise<Badge[]> {
+  const res = await fetch(`${API_BASE_URL}/vendors/badges`, { cache: 'no-store' });
+  if (!res.ok) return [];
+  return res.json();
+}
+
 export default async function MenuPage() {
-  const vendors = await getVendors();
+  const [vendors, badges] = await Promise.all([getVendors(), getBadges()]);
 
   return (
     <section className="px-6 pb-24 pt-16">
@@ -26,7 +32,7 @@ export default async function MenuPage() {
           kitchen or search for a dish — pay only when it arrives at your door.
         </p>
 
-        <MenuBrowser vendors={vendors} />
+        <MenuBrowser vendors={vendors} badges={badges} />
       </div>
     </section>
   );

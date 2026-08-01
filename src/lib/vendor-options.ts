@@ -1,4 +1,5 @@
 export const CUISINE_OPTIONS = [
+  'Nigerian',
   'Swallow & Soups',
   'Rice & Grains',
   'Proteins & Sides',
@@ -59,4 +60,10 @@ export function getEstimatedDeliveryMinutes(vendor: {
  * exceeds even the widest bucket. */
 export function getDeliveryTimeBucket(totalMinutes: number) {
   return DELIVERY_TIME_BUCKETS.find((b) => totalMinutes <= b.maxMinutes) ?? null;
+}
+
+/** "500+" once past 500 ratings, exact count otherwise — shared by the browse cards and the
+ * vendor detail page header so the format never drifts between the two. */
+export function formatRatingCount(n: number): string {
+  return n > 500 ? '500+' : String(n);
 }

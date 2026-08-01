@@ -71,5 +71,8 @@ export async function apiFetch(path: string, options: RequestInit = {}) {
     throw new ApiError(body?.message ?? res.statusText, res.status);
   }
 
-  return res.json();
+  // A 2xx response can legitimately have an empty body (e.g. a controller returning `null`) —
+  // res.json() throws a SyntaxError on empty input, so parse manually and treat empty as null.
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
 }

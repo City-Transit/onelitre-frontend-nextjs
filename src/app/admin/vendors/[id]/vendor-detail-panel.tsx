@@ -7,6 +7,7 @@ import { API_BASE_URL } from '@/lib/api-base-url';
 import { formatDate } from '@/lib/format';
 import { WALKTHROUGH_CHECKLIST_ITEMS } from '@/lib/vendor-walkthrough-checklist';
 import type {
+  Badge,
   Vendor,
   VendorDocument,
   VendorDocumentType,
@@ -105,14 +106,51 @@ export function VendorDetailPanel({
   orderGroups,
   initialWalkthroughs,
   initialIncidents,
+  allBadges,
 }: {
   vendor: Vendor;
   initialDocuments: VendorDocument[];
   orderGroups: VendorOrderGroup[];
   initialWalkthroughs: VendorWalkthrough[];
   initialIncidents: VendorIncident[];
+  allBadges: Badge[];
 }) {
   const router = useRouter();
+  const [vendorBadges, setVendorBadges] = useState(vendor.badges ?? []);
+  const [badgeToAdd, setBadgeToAdd] = useState('');
+  const [badgeBusy, setBadgeBusy] = useState(false);
+  const assignableBadges = allBadges.filter(
+    (b) => !vendorBadges.some((vb) => vb.id === b.id),
+  );
+
+  async function addBadge() {
+    if (!badgeToAdd) return;
+    setBadgeBusy(true);
+    try {
+      const updated: Vendor = await apiFetch(`/admin/vendors/${vendor.id}/badges`, {
+        method: 'POST',
+        body: JSON.stringify({ badgeId: badgeToAdd }),
+      });
+      setVendorBadges(updated.badges ?? []);
+      setBadgeToAdd('');
+    } finally {
+      setBadgeBusy(false);
+    }
+  }
+
+  async function removeBadge(badgeId: string) {
+    setBadgeBusy(true);
+    try {
+      const updated: Vendor = await apiFetch(
+        `/admin/vendors/${vendor.id}/badges/${badgeId}`,
+        { method: 'DELETE' },
+      );
+      setVendorBadges(updated.badges ?? []);
+    } finally {
+      setBadgeBusy(false);
+    }
+  }
+
   const [effectiveSplit, setEffectiveSplit] = useState(vendor.effectiveSplit);
   const [customPcts, setCustomPcts] = useState({
     advancePct: vendor.customAdvancePct,
@@ -320,6 +358,58 @@ export function VendorDetailPanel({
       </div>
 
       <div className="rounded-[20px] bg-paper p-6 text-ink shadow-[0_24px_60px_rgba(18,33,29,0.35)]">
+        <h3 className="font-semibold">Badges</h3>
+        <p className="mt-1 text-sm text-[#5B6B63]">
+          Shown to customers on the menu browser. &ldquo;Certified&rdquo; is separate — it&apos;s
+          set automatically once CAC and food-safety documents are verified.
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {vendorBadges.length === 0 && (
+            <span className="text-sm text-[#8A8073]">No badges assigned.</span>
+          )}
+          {vendorBadges.map((b) => (
+            <span
+              key={b.id}
+              className="flex items-center gap-1.5 rounded-full bg-paper-dim px-3 py-1 text-xs font-semibold"
+            >
+              {b.label}
+              <button
+                onClick={() => removeBadge(b.id)}
+                disabled={badgeBusy}
+                aria-label={`Remove ${b.label} badge`}
+                className="text-[#8A8073] hover:text-red-700 disabled:opacity-60"
+              >
+                ×
+              </button>
+            </span>
+          ))}
+        </div>
+        {assignableBadges.length > 0 && (
+          <div className="mt-3 flex items-center gap-2">
+            <select
+              value={badgeToAdd}
+              onChange={(e) => setBadgeToAdd(e.target.value)}
+              className="rounded-[10px] border border-[rgba(18,33,29,0.14)] bg-paper-dim px-3 py-2 text-sm"
+            >
+              <option value="">Select a badge…</option>
+              {assignableBadges.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.label}
+                </option>
+              ))}
+            </select>
+            <button
+              onClick={addBadge}
+              disabled={!badgeToAdd || badgeBusy}
+              className="rounded-full bg-paprika-dim px-4 py-2 text-sm font-semibold text-white hover:bg-paprika disabled:opacity-60"
+            >
+              Add
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="rounded-[20px] bg-paper p-6 text-ink shadow-[0_24px_60px_rgba(18,33,29,0.35)]">
         <h3 className="font-semibold">Payout split</h3>
         <p className="mt-1 text-sm text-[#5B6B63]">
           {customPcts.advancePct != null ? (
@@ -485,7 +575,9 @@ export function VendorDetailPanel({
                       {meal.approvalStatus}
                     </span>
                   )}
-                  <span className="text-xs text-[#5B6B63]">{meal.sizes.length} size(s)</span>
+                  <span className="text-xs text-[#5B6B63]">
+                    {meal.litres}L · ₦{meal.price.toLocaleString('en-NG')}
+                  </span>
                 </div>
               </div>
             ))}

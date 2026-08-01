@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { apiFetch, ApiError } from '@/lib/api';
 import { useCart } from '../menu/cart-context';
 import { COMING_SOON_CITIES, LAGOS_AREAS, LIVE_CITY } from '@/lib/locations';
-import type { DeliveryFee, Vendor } from '@/lib/types';
+import type { DeliveryFee, User, Vendor } from '@/lib/types';
 
 const naira = (n: number) => `₦${n.toLocaleString('en-NG')}`;
 
@@ -14,12 +14,12 @@ const TIME_SLOTS = ['9am-11am', '11am-1pm', '1pm-3pm', '3pm-5pm', '5pm-7pm'];
 const inputClass =
   'w-full rounded-[10px] border border-[rgba(18,33,29,0.14)] bg-paper-dim px-4 py-3 text-[15px] text-ink focus:border-paprika focus:bg-white focus:outline-none';
 
-export function CheckoutForm({ vendors }: { vendors: Vendor[] }) {
+export function CheckoutForm({ vendors, user }: { vendors: Vendor[]; user: User | null }) {
   const router = useRouter();
   const { cart, count } = useCart();
   const [city, setCity] = useState(LIVE_CITY);
-  const [area, setArea] = useState('');
-  const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [area, setArea] = useState(user?.area ?? '');
+  const [deliveryAddress, setDeliveryAddress] = useState(user?.address ?? '');
   const [deliveryDate, setDeliveryDate] = useState('');
   const [deliveryTimeSlot, setDeliveryTimeSlot] = useState('');
   const [notes, setNotes] = useState('');
@@ -39,19 +39,17 @@ export function CheckoutForm({ vendors }: { vendors: Vendor[] }) {
       .catch(() => {});
   }, []);
 
-  const sizesById = new Map(
-    vendors.flatMap((v) => v.meals.flatMap((m) => m.sizes.map((s) => [s.id, { size: s, meal: m }] as const))),
-  );
+  const itemsById = new Map(vendors.flatMap((v) => v.meals.map((item) => [item.id, item] as const)));
 
   const lines = Object.entries(cart)
     .map(([mealSizeId, quantity]) => {
-      const entry = sizesById.get(mealSizeId);
-      if (!entry) return null;
-      return { mealSizeId, quantity, meal: entry.meal, size: entry.size };
+      const item = itemsById.get(mealSizeId);
+      if (!item) return null;
+      return { mealSizeId, quantity, item };
     })
     .filter((line): line is NonNullable<typeof line> => line !== null);
 
-  const subtotal = lines.reduce((sum, line) => sum + line.size.price * line.quantity, 0);
+  const subtotal = lines.reduce((sum, line) => sum + line.item.price * line.quantity, 0);
   const deliveryFee = feesByArea.get(area) ?? 0;
   const grandTotal = subtotal + deliveryFee;
 
@@ -97,10 +95,10 @@ export function CheckoutForm({ vendors }: { vendors: Vendor[] }) {
             {lines.map((line) => (
               <div key={line.mealSizeId} className="flex justify-between py-2 text-sm">
                 <span>
-                  {line.meal.name} — {line.size.litres}L ({line.size.servings} meals) ×{' '}
+                  {line.item.name} — {line.item.litres}L ({line.item.servings} meals) ×{' '}
                   {line.quantity}
                 </span>
-                <span>{naira(line.size.price * line.quantity)}</span>
+                <span>{naira(line.item.price * line.quantity)}</span>
               </div>
             ))}
             <div className="mt-2 flex justify-between border-t border-[rgba(18,33,29,0.14)] pt-3 text-sm">

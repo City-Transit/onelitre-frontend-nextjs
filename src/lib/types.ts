@@ -16,23 +16,14 @@ export interface User {
   firstName: string;
   lastName: string;
   address?: string | null;
+  area?: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface MealSize {
-  id: string;
-  litres: number;
-  price: number;
-  servings: number;
-  note?: string | null;
-  /** Vendor's self-certified price on their own channels — platform price should stay within 10% of this. */
-  ownChannelPrice?: number | null;
-}
-
 export type MealApprovalStatus = 'pending' | 'approved' | 'rejected';
 
-export interface Meal {
+export interface MealSize {
   id: string;
   name: string;
   description?: string | null;
@@ -41,12 +32,23 @@ export interface Meal {
   approvalStatus?: MealApprovalStatus;
   rejectionReason?: string | null;
   photoRequested?: boolean;
+  litres: number;
+  price: number;
+  servings: number;
+  note?: string | null;
+  /** Vendor's self-certified price on their own channels — platform price should stay within 10% of this. */
+  ownChannelPrice?: number | null;
   vendorId?: string;
   vendor?: { id: string; name: string };
-  sizes: MealSize[];
 }
 
 export type VendorStatus = 'pending' | 'approved' | 'suspended' | 'paused' | 'offboarded';
+
+export interface Badge {
+  id: string;
+  name: string;
+  label: string;
+}
 
 export interface Vendor {
   id: string;
@@ -55,6 +57,7 @@ export interface Vendor {
   address?: string | null;
   contactPhone?: string | null;
   cuisines?: string[] | null;
+  badges?: Badge[];
   estimatedPrepMinutes?: number | null;
   estimatedDeliveryMinutes?: number | null;
   contractAcceptedAt?: string | null;
@@ -63,7 +66,7 @@ export interface Vendor {
   contractSignedVersion?: string | null;
   status?: VendorStatus;
   ownerId?: string | null;
-  meals: Meal[];
+  meals: MealSize[];
   ratingAverage?: number | null;
   ratingCount?: number;
   profileComplete?: boolean;
@@ -174,6 +177,26 @@ export interface DeliveryFee {
   area: string;
   feeNaira: number;
   updatedAt: string;
+}
+
+export type SubscriptionStatus = 'pending' | 'active' | 'lapsed' | 'cancelled';
+
+export interface Subscription {
+  id: string;
+  customerId: string;
+  planCode: string;
+  status: SubscriptionStatus;
+  currentPeriodEnd?: string | null;
+  createdAt: string;
+}
+
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  paystackPlanCode: string;
+  priceNaira: number;
+  isActive: boolean;
+  createdAt: string;
 }
 
 export type PayoutType = 'advance' | 'remainder';
