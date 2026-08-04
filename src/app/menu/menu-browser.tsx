@@ -3,10 +3,14 @@
 import { useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import type { Vendor } from '@/lib/types';
+import type { Badge, Vendor } from '@/lib/types';
 import {
+  CERTIFIED_BADGE_ID,
   CUISINE_OPTIONS,
   DELIVERY_TIME_BUCKETS,
+  PRICE_BUCKETS,
+  RATING_BUCKETS,
+  formatRatingCount,
   getDeliveryTimeBucket,
   getEstimatedDeliveryMinutes,
 } from '@/lib/vendor-options';
@@ -17,31 +21,32 @@ const GRADIENTS = [
   'from-paprika-dim/70 to-bg-alt',
 ];
 
-const PRICE_BUCKETS = [
-  { value: 'under-20k', label: 'Under ₦20,000', test: (p: number) => p < 20000 },
-  { value: '20k-40k', label: '₦20,000–₦40,000', test: (p: number) => p >= 20000 && p <= 40000 },
-  { value: 'over-40k', label: 'Above ₦40,000', test: (p: number) => p > 40000 },
-];
-
-const RATING_BUCKETS = [
-  { value: '4', label: '4+ stars', min: 4 },
-  { value: '3', label: '3+ stars', min: 3 },
-];
-
 function cheapestPrice(vendor: Vendor): number | null {
-  const prices = vendor.meals.flatMap((m) => m.sizes.map((s) => s.price));
+  const prices = vendor.meals.map((item) => item.price);
   return prices.length > 0 ? Math.min(...prices) : null;
 }
 
 const selectClass =
   'rounded-[3px] border border-line bg-bg-alt px-3 py-2.5 text-[13.5px] text-paper focus:border-frost focus:outline-none';
 
-export function MenuBrowser({ vendors }: { vendors: Vendor[] }) {
+export function MenuBrowser({ vendors, badges }: { vendors: Vendor[]; badges: Badge[] }) {
   const [query, setQuery] = useState('');
   const [cuisine, setCuisine] = useState('');
   const [priceBucket, setPriceBucket] = useState('');
   const [minRating, setMinRating] = useState('');
   const [deliveryTimeBucket, setDeliveryTimeBucket] = useState('');
+  const [selectedBadges, setSelectedBadges] = useState<string[]>([]);
+
+  const badgeFilterOptions = [
+    { id: CERTIFIED_BADGE_ID, label: 'Certified' },
+    ...badges.map((b) => ({ id: b.id, label: b.label })),
+  ];
+
+  function toggleBadge(id: string) {
+    setSelectedBadges((prev) =>
+      prev.includes(id) ? prev.filter((b) => b !== id) : [...prev, id],
+    );
+  }
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -81,9 +86,17 @@ export function MenuBrowser({ vendors }: { vendors: Vendor[] }) {
         if (vendorRank === -1 || vendorRank > selectedRank) return false;
       }
 
+      if (selectedBadges.length > 0) {
+        const vendorBadgeIds = new Set(vendor.badges?.map((b) => b.id) ?? []);
+        const matchesAny = selectedBadges.some((id) =>
+          id === CERTIFIED_BADGE_ID ? Boolean(vendor.certifiedAt) : vendorBadgeIds.has(id),
+        );
+        if (!matchesAny) return false;
+      }
+
       return true;
     });
-  }, [vendors, query, cuisine, priceBucket, minRating, deliveryTimeBucket]);
+  }, [vendors, query, cuisine, priceBucket, minRating, deliveryTimeBucket, selectedBadges]);
 
   return (
     <>
@@ -148,6 +161,27 @@ export function MenuBrowser({ vendors }: { vendors: Vendor[] }) {
         </select>
       </div>
 
+      <div className="mt-3 flex flex-wrap gap-2">
+        {badgeFilterOptions.map((b) => {
+          const active = selectedBadges.includes(b.id);
+          return (
+            <button
+              key={b.id}
+              type="button"
+              onClick={() => toggleBadge(b.id)}
+              aria-pressed={active}
+              className={`rounded-full border px-3.5 py-1.5 font-mono text-[12px] transition-colors ${
+                active
+                  ? 'border-frost bg-frost text-bg'
+                  : 'border-line bg-bg-alt text-muted hover:text-paper'
+              }`}
+            >
+              {b.label}
+            </button>
+          );
+        })}
+      </div>
+
       <div className="mt-8">
         {vendors.length === 0 && (
           <p className="border-t border-line py-12 text-muted">
@@ -194,13 +228,30 @@ export function MenuBrowser({ vendors }: { vendors: Vendor[] }) {
                 <div className="flex flex-1 flex-col gap-1.5 p-5">
                   <h3 className="text-lg leading-snug text-paper">{vendor.name}</h3>
                   <div className="font-mono text-xs text-frost">{vendor.area}</div>
+                  {(vendor.certifiedAt || (vendor.badges && vendor.badges.length > 0)) && (
+                    <div className="flex flex-wrap gap-1.5 pt-0.5">
+                      {vendor.certifiedAt && (
+                        <span className="rounded-full bg-frost/15 px-2.5 py-0.5 font-mono text-[10.5px] text-frost">
+                          Certified
+                        </span>
+                      )}
+                      {vendor.badges?.map((b) => (
+                        <span
+                          key={b.id}
+                          className="rounded-full bg-paprika/15 px-2.5 py-0.5 font-mono text-[10.5px] text-paprika"
+                        >
+                          {b.label}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   <div className="mt-auto flex items-center justify-between pt-3 text-[13px] text-muted">
                     <span>
                       {mealCount} {mealCount === 1 ? 'meal' : 'meals'}
                     </span>
                     {vendor.ratingCount ? (
                       <span className="text-paprika">
-                        ★ {vendor.ratingAverage?.toFixed(1)} ({vendor.ratingCount})
+                        ★ {vendor.ratingAverage?.toFixed(1)} ({formatRatingCount(vendor.ratingCount)})
                       </span>
                     ) : null}
                   </div>

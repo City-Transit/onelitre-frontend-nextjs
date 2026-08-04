@@ -1,6 +1,6 @@
 import { serverApiFetch } from '@/lib/server-api';
 import { Pagination } from '@/components/pagination';
-import type { Meal, Paginated } from '@/lib/types';
+import type { MealSize, Paginated } from '@/lib/types';
 import { MealApprovalsTable } from './meal-approvals-table';
 
 export default async function AdminMenuApprovalsPage({
@@ -12,7 +12,7 @@ export default async function AdminMenuApprovalsPage({
   const page = pageParam ? Math.max(1, Number(pageParam)) : 1;
 
   const res = await serverApiFetch(`/admin/meals?page=${page}&limit=20`);
-  const data: Paginated<Meal> = res.ok
+  const data: Paginated<MealSize> = res.ok
     ? await res.json()
     : { items: [], total: 0, page, limit: 20 };
   const totalPages = Math.max(1, Math.ceil(data.total / data.limit));

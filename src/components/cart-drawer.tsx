@@ -4,14 +4,17 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { apiFetch } from '@/lib/api';
 import { useCart } from '@/app/menu/cart-context';
+import { useSavingsBenchmark } from '@/lib/use-savings-benchmark';
+import { computeSavings } from '@/lib/savings';
 import type { Vendor } from '@/lib/types';
 
 const naira = (n: number) => `₦${n.toLocaleString('en-NG')}`;
 
 export function CartDrawer() {
-  const { cart, vendorId, count, isDrawerOpen, closeDrawer } = useCart();
+  const { cart, vendorId, count, isDrawerOpen, closeDrawer, setQty, prune } = useCart();
   const [vendor, setVendor] = useState<Vendor | null>(null);
   const [loading, setLoading] = useState(false);
+  const benchmark = useSavingsBenchmark();
 
   useEffect(() => {
     if (!isDrawerOpen || !vendorId) return;
@@ -21,7 +24,9 @@ export function CartDrawer() {
       setLoading(true);
       try {
         const v: Vendor = await apiFetch(`/vendors/${vendorId}`);
-        if (!cancelled) setVendor(v);
+        if (cancelled) return;
+        setVendor(v);
+        prune(new Set(v.meals.map((item) => item.id)));
       } catch {
         if (!cancelled) setVendor(null);
       } finally {
@@ -33,18 +38,19 @@ export function CartDrawer() {
     return () => {
       cancelled = true;
     };
-  }, [isDrawerOpen, vendorId]);
+  }, [isDrawerOpen, vendorId, prune]);
 
   if (!isDrawerOpen) return null;
 
   const lines = vendor
     ? vendor.meals
-        .flatMap((meal) => meal.sizes.map((size) => ({ meal, size })))
-        .filter(({ size }) => (cart[size.id] ?? 0) > 0)
-        .map(({ meal, size }) => ({ meal, size, quantity: cart[size.id] }))
+        .filter((item) => (cart[item.id] ?? 0) > 0)
+        .map((item) => ({ item, quantity: cart[item.id] }))
     : [];
 
-  const total = lines.reduce((sum, line) => sum + line.size.price * line.quantity, 0);
+  const total = lines.reduce((sum, line) => sum + line.item.price * line.quantity, 0);
+  const mealsCovered = lines.reduce((sum, line) => sum + line.item.servings * line.quantity, 0);
+  const savingsResult = benchmark ? computeSavings(mealsCovered, total, benchmark) : null;
 
   return (
     <div className="fixed inset-0 z-[60] flex justify-end">
@@ -72,19 +78,58 @@ export function CartDrawer() {
           )}
           {!loading &&
             lines.map((line) => (
-              <div key={line.size.id} className="flex justify-between gap-3 py-2.5 text-sm">
-                <span className="text-paper">
-                  {line.meal.name} — {line.size.litres}L × {line.quantity}
-                </span>
-                <span className="whitespace-nowrap text-muted">
-                  {naira(line.size.price * line.quantity)}
-                </span>
+              <div
+                key={line.item.id}
+                className="flex items-center justify-between gap-3 border-b border-line/50 py-3 text-sm last:border-b-0"
+              >
+                <div className="min-w-0">
+                  <div className="truncate text-paper">
+                    {line.item.name} — {line.item.litres}L
+                  </div>
+                  <div className="mt-0.5 text-xs text-muted">
+                    {naira(line.item.price * line.quantity)}
+                  </div>
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  <button
+                    aria-label={`Decrease ${line.item.name} quantity`}
+                    onClick={() =>
+                      vendorId && setQty(line.item.id, line.quantity - 1, vendorId)
+                    }
+                    className="h-6 w-6 rounded-full border border-line text-paper"
+                  >
+                    −
+                  </button>
+                  <span className="w-4 text-center text-paper">{line.quantity}</span>
+                  <button
+                    aria-label={`Increase ${line.item.name} quantity`}
+                    onClick={() =>
+                      vendorId && setQty(line.item.id, line.quantity + 1, vendorId)
+                    }
+                    className="h-6 w-6 rounded-full border border-line text-paper"
+                  >
+                    +
+                  </button>
+                  <button
+                    aria-label={`Remove ${line.item.name} from basket`}
+                    onClick={() => vendorId && setQty(line.item.id, 0, vendorId)}
+                    className="ml-1 font-mono text-xs text-muted transition-colors hover:text-red-400"
+                  >
+                    Remove
+                  </button>
+                </div>
               </div>
             ))}
         </div>
 
         {count > 0 && (
           <div className="border-t border-line px-6 py-5">
+            {savingsResult && savingsResult.savings > 0 && (
+              <div className="mb-3 font-mono text-xs text-frost">
+                ≈ {mealsCovered} {mealsCovered === 1 ? 'meal' : 'meals'} · save{' '}
+                {naira(savingsResult.savings)} vs. delivery apps
+              </div>
+            )}
             <div className="mb-4 flex justify-between font-serif text-lg text-paper">
               <span>Total</span>
               <span>{naira(total)}</span>

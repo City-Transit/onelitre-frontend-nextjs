@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { serverApiFetch } from '@/lib/server-api';
 import type {
+  Badge,
   Paginated,
   Vendor,
   VendorDocument,
@@ -16,13 +17,15 @@ export default async function AdminVendorDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [vendorRes, documentsRes, ordersRes, walkthroughsRes, incidentsRes] = await Promise.all([
-    serverApiFetch(`/admin/vendors/${id}`),
-    serverApiFetch(`/admin/vendors/${id}/documents`),
-    serverApiFetch(`/admin/vendors/${id}/orders?limit=100`),
-    serverApiFetch(`/admin/vendors/${id}/walkthroughs`),
-    serverApiFetch(`/admin/vendors/${id}/incidents`),
-  ]);
+  const [vendorRes, documentsRes, ordersRes, walkthroughsRes, incidentsRes, badgesRes] =
+    await Promise.all([
+      serverApiFetch(`/admin/vendors/${id}`),
+      serverApiFetch(`/admin/vendors/${id}/documents`),
+      serverApiFetch(`/admin/vendors/${id}/orders?limit=100`),
+      serverApiFetch(`/admin/vendors/${id}/walkthroughs`),
+      serverApiFetch(`/admin/vendors/${id}/incidents`),
+      serverApiFetch('/admin/badges'),
+    ]);
   if (vendorRes.status === 404) notFound();
   if (!vendorRes.ok) notFound();
 
@@ -33,6 +36,7 @@ export default async function AdminVendorDetailPage({
     : { items: [], total: 0, page: 1, limit: 100 };
   const walkthroughs: VendorWalkthrough[] = walkthroughsRes.ok ? await walkthroughsRes.json() : [];
   const incidents: VendorIncident[] = incidentsRes.ok ? await incidentsRes.json() : [];
+  const allBadges: Badge[] = badgesRes.ok ? await badgesRes.json() : [];
 
   return (
     <div>
@@ -43,6 +47,7 @@ export default async function AdminVendorDetailPage({
         orderGroups={orders.items}
         initialWalkthroughs={walkthroughs}
         initialIncidents={incidents}
+        allBadges={allBadges}
       />
     </div>
   );

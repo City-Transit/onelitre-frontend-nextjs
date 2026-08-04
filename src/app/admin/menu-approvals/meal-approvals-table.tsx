@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import { apiFetch, ApiError } from '@/lib/api';
-import type { Meal } from '@/lib/types';
+import type { MealSize } from '@/lib/types';
 
 const naira = (n: number) => `₦${n.toLocaleString('en-NG')}`;
 
-export function MealApprovalsTable({ initialMeals }: { initialMeals: Meal[] }) {
+export function MealApprovalsTable({ initialMeals }: { initialMeals: MealSize[] }) {
   const [meals, setMeals] = useState(initialMeals);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [reasonById, setReasonById] = useState<Record<string, string>>({});
@@ -79,11 +79,9 @@ export function MealApprovalsTable({ initialMeals }: { initialMeals: Meal[] }) {
                 <p className="mt-1 text-sm text-[#5B6B63]">{meal.description}</p>
               )}
               <div className="mt-2 flex flex-wrap gap-2 text-xs text-[#5B6B63]">
-                {meal.sizes.map((s) => (
-                  <span key={s.id} className="rounded-full bg-paper-dim px-2.5 py-1">
-                    {s.litres}L · {naira(s.price)}
-                  </span>
-                ))}
+                <span className="rounded-full bg-paper-dim px-2.5 py-1">
+                  {meal.litres}L · {naira(meal.price)}
+                </span>
               </div>
               <div className="mt-2 text-xs">
                 {meal.imageUrl ? (

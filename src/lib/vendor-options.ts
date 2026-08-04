@@ -1,4 +1,5 @@
 export const CUISINE_OPTIONS = [
+  'Nigerian',
   'Swallow & Soups',
   'Rice & Grains',
   'Proteins & Sides',
@@ -60,3 +61,25 @@ export function getEstimatedDeliveryMinutes(vendor: {
 export function getDeliveryTimeBucket(totalMinutes: number) {
   return DELIVERY_TIME_BUCKETS.find((b) => totalMinutes <= b.maxMinutes) ?? null;
 }
+
+/** "500+" once past 500 ratings, exact count otherwise — shared by the browse cards and the
+ * vendor detail page header so the format never drifts between the two. */
+export function formatRatingCount(n: number): string {
+  return n > 500 ? '500+' : String(n);
+}
+
+/** Shared by the vendor-browse filter bar (bucketing vendors by their cheapest item) and the
+ * individual vendor page's filter bar (bucketing that vendor's own items directly). */
+export const PRICE_BUCKETS = [
+  { value: 'under-20k', label: 'Under ₦20,000', test: (p: number) => p < 20000 },
+  { value: '20k-40k', label: '₦20,000–₦40,000', test: (p: number) => p >= 20000 && p <= 40000 },
+  { value: 'over-40k', label: 'Above ₦40,000', test: (p: number) => p > 40000 },
+];
+
+export const RATING_BUCKETS = [
+  { value: '4.5', label: '4.5+ stars', min: 4.5 },
+  { value: '4', label: '4+ stars', min: 4 },
+  { value: '3.5', label: '3.5+ stars', min: 3.5 },
+];
+
+export const CERTIFIED_BADGE_ID = 'certified';

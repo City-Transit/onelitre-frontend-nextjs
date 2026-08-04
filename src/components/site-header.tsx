@@ -25,7 +25,7 @@ export async function SiteHeader() {
         </Link>
         <nav className="flex items-center gap-5 font-mono text-[13px]">
           <Link href="/menu" className="text-paper transition-colors hover:text-frost">
-            View menu
+            View vendors
           </Link>
           <BasketButton />
           {user ? (

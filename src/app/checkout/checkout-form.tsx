@@ -5,44 +5,62 @@ import { useRouter } from 'next/navigation';
 import { apiFetch, ApiError } from '@/lib/api';
 import { useCart } from '../menu/cart-context';
 import { COMING_SOON_CITIES, LAGOS_AREAS, LIVE_CITY } from '@/lib/locations';
-import type { Vendor } from '@/lib/types';
+import { useSavingsBenchmark } from '@/lib/use-savings-benchmark';
+import { computeSavings } from '@/lib/savings';
+import type { DeliveryFee, User, Vendor } from '@/lib/types';
 
 const naira = (n: number) => `₦${n.toLocaleString('en-NG')}`;
 
 const TIME_SLOTS = ['9am-11am', '11am-1pm', '1pm-3pm', '3pm-5pm', '5pm-7pm'];
 
+/** Platform service fee — keep in sync with SERVICE_FEE_RATE in web/backend orders.service.ts. */
+const SERVICE_FEE_RATE = 0.02;
+
 const inputClass =
   'w-full rounded-[10px] border border-[rgba(18,33,29,0.14)] bg-paper-dim px-4 py-3 text-[15px] text-ink focus:border-paprika focus:bg-white focus:outline-none';
 
-export function CheckoutForm({ vendors }: { vendors: Vendor[] }) {
+export function CheckoutForm({ vendors, user }: { vendors: Vendor[]; user: User | null }) {
   const router = useRouter();
   const { cart, count } = useCart();
   const [city, setCity] = useState(LIVE_CITY);
-  const [area, setArea] = useState('');
-  const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [area, setArea] = useState(user?.area ?? '');
+  const [deliveryAddress, setDeliveryAddress] = useState(user?.address ?? '');
   const [deliveryDate, setDeliveryDate] = useState('');
   const [deliveryTimeSlot, setDeliveryTimeSlot] = useState('');
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [feesByArea, setFeesByArea] = useState<Map<string, number>>(new Map());
+  const benchmark = useSavingsBenchmark();
 
   useEffect(() => {
     if (count === 0) router.replace('/menu');
   }, [count, router]);
 
-  const sizesById = new Map(
-    vendors.flatMap((v) => v.meals.flatMap((m) => m.sizes.map((s) => [s.id, { size: s, meal: m }] as const))),
-  );
+  useEffect(() => {
+    apiFetch('/delivery-fees')
+      .then((fees: DeliveryFee[]) => {
+        setFeesByArea(new Map(fees.map((f) => [f.area, f.feeNaira])));
+      })
+      .catch(() => {});
+  }, []);
+
+  const itemsById = new Map(vendors.flatMap((v) => v.meals.map((item) => [item.id, item] as const)));
 
   const lines = Object.entries(cart)
     .map(([mealSizeId, quantity]) => {
-      const entry = sizesById.get(mealSizeId);
-      if (!entry) return null;
-      return { mealSizeId, quantity, meal: entry.meal, size: entry.size };
+      const item = itemsById.get(mealSizeId);
+      if (!item) return null;
+      return { mealSizeId, quantity, item };
     })
     .filter((line): line is NonNullable<typeof line> => line !== null);
 
-  const total = lines.reduce((sum, line) => sum + line.size.price * line.quantity, 0);
+  const subtotal = lines.reduce((sum, line) => sum + line.item.price * line.quantity, 0);
+  const deliveryFee = feesByArea.get(area) ?? 0;
+  const serviceFee = Math.round(subtotal * SERVICE_FEE_RATE);
+  const grandTotal = subtotal + deliveryFee + serviceFee;
+  const mealsCovered = lines.reduce((sum, line) => sum + line.item.servings * line.quantity, 0);
+  const savingsResult = benchmark ? computeSavings(mealsCovered, grandTotal, benchmark) : null;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -54,6 +72,7 @@ export function CheckoutForm({ vendors }: { vendors: Vendor[] }) {
         body: JSON.stringify({
           deliveryAddress,
           deliveryArea: `${area}, ${city}`,
+          area,
           deliveryDate,
           deliveryTimeSlot,
           notes: notes || undefined,
@@ -85,16 +104,36 @@ export function CheckoutForm({ vendors }: { vendors: Vendor[] }) {
             {lines.map((line) => (
               <div key={line.mealSizeId} className="flex justify-between py-2 text-sm">
                 <span>
-                  {line.meal.name} — {line.size.litres}L ({line.size.servings} meals) ×{' '}
+                  {line.item.name} — {line.item.litres}L ({line.item.servings} meals) ×{' '}
                   {line.quantity}
                 </span>
-                <span>{naira(line.size.price * line.quantity)}</span>
+                <span>{naira(line.item.price * line.quantity)}</span>
               </div>
             ))}
-            <div className="mt-2 flex justify-between border-t border-[rgba(18,33,29,0.14)] pt-3 font-semibold">
-              <span>Total</span>
-              <span>{naira(total)}</span>
+            <div className="mt-2 flex justify-between border-t border-[rgba(18,33,29,0.14)] pt-3 text-sm">
+              <span>Subtotal</span>
+              <span>{naira(subtotal)}</span>
             </div>
+            <div className="flex justify-between py-1 text-sm">
+              <span>Delivery fee{area ? '' : ' (select an area)'}</span>
+              <span>{naira(deliveryFee)}</span>
+            </div>
+            <div className="flex justify-between py-1 text-sm">
+              <span>Service fee (2%)</span>
+              <span>{naira(serviceFee)}</span>
+            </div>
+            <div className="flex justify-between border-t border-[rgba(18,33,29,0.14)] pt-3 font-semibold">
+              <span>Total</span>
+              <span>{naira(grandTotal)}</span>
+            </div>
+            {savingsResult && savingsResult.savings > 0 && (
+              <div className="mt-3 rounded-[10px] bg-paprika/10 px-3 py-2.5 text-xs text-paprika-dim">
+                This order covers {mealsCovered} {mealsCovered === 1 ? 'meal' : 'meals'} — ordered
+                the same way via typical delivery apps, that&apos;d run ~
+                {naira(savingsResult.restaurantEquivalentCost)}. You&apos;re saving{' '}
+                {naira(savingsResult.savings)} ({Math.round(savingsResult.pctSaved * 100)}%).
+              </div>
+            )}
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-3">
