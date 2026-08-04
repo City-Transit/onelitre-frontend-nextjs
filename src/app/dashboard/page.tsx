@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation';
 import { serverApiFetch } from '@/lib/server-api';
 import type { Order, User } from '@/lib/types';
-import { SiteHeader } from '@/components/site-header';
 import LogoutButton from './logout-button';
 import EditProfileForm from './edit-profile-form';
 import { MyOrders } from './my-orders';
@@ -19,7 +18,6 @@ export default async function DashboardPage() {
 
   return (
     <>
-      <SiteHeader />
       <div className="mx-auto w-full max-w-2xl flex-1 px-6 py-16">
         <div className="flex items-center justify-between">
           <div>
