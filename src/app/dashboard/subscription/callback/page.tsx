@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
-import { SiteHeader } from '@/components/site-header';
 import type { Subscription } from '@/lib/types';
 
 const POLL_INTERVAL_MS = 2000;
@@ -48,7 +47,6 @@ export default function SubscriptionCallbackPage() {
 
   return (
     <>
-      <SiteHeader />
       <section className="bg-paper px-6 py-24 text-ink">
         <div className="mx-auto max-w-lg rounded-[16px] border border-[rgba(18,33,29,0.14)] p-8 text-center">
           {phase === 'checking' && (
