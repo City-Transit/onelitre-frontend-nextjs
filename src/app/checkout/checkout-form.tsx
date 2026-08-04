@@ -5,11 +5,16 @@ import { useRouter } from 'next/navigation';
 import { apiFetch, ApiError } from '@/lib/api';
 import { useCart } from '../menu/cart-context';
 import { COMING_SOON_CITIES, LAGOS_AREAS, LIVE_CITY } from '@/lib/locations';
+import { useSavingsBenchmark } from '@/lib/use-savings-benchmark';
+import { computeSavings } from '@/lib/savings';
 import type { DeliveryFee, User, Vendor } from '@/lib/types';
 
 const naira = (n: number) => `₦${n.toLocaleString('en-NG')}`;
 
 const TIME_SLOTS = ['9am-11am', '11am-1pm', '1pm-3pm', '3pm-5pm', '5pm-7pm'];
+
+/** Platform service fee — keep in sync with SERVICE_FEE_RATE in web/backend orders.service.ts. */
+const SERVICE_FEE_RATE = 0.02;
 
 const inputClass =
   'w-full rounded-[10px] border border-[rgba(18,33,29,0.14)] bg-paper-dim px-4 py-3 text-[15px] text-ink focus:border-paprika focus:bg-white focus:outline-none';
@@ -26,6 +31,7 @@ export function CheckoutForm({ vendors, user }: { vendors: Vendor[]; user: User 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [feesByArea, setFeesByArea] = useState<Map<string, number>>(new Map());
+  const benchmark = useSavingsBenchmark();
 
   useEffect(() => {
     if (count === 0) router.replace('/menu');
@@ -51,7 +57,10 @@ export function CheckoutForm({ vendors, user }: { vendors: Vendor[]; user: User 
 
   const subtotal = lines.reduce((sum, line) => sum + line.item.price * line.quantity, 0);
   const deliveryFee = feesByArea.get(area) ?? 0;
-  const grandTotal = subtotal + deliveryFee;
+  const serviceFee = Math.round(subtotal * SERVICE_FEE_RATE);
+  const grandTotal = subtotal + deliveryFee + serviceFee;
+  const mealsCovered = lines.reduce((sum, line) => sum + line.item.servings * line.quantity, 0);
+  const savingsResult = benchmark ? computeSavings(mealsCovered, grandTotal, benchmark) : null;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -109,10 +118,22 @@ export function CheckoutForm({ vendors, user }: { vendors: Vendor[]; user: User 
               <span>Delivery fee{area ? '' : ' (select an area)'}</span>
               <span>{naira(deliveryFee)}</span>
             </div>
+            <div className="flex justify-between py-1 text-sm">
+              <span>Service fee (2%)</span>
+              <span>{naira(serviceFee)}</span>
+            </div>
             <div className="flex justify-between border-t border-[rgba(18,33,29,0.14)] pt-3 font-semibold">
               <span>Total</span>
               <span>{naira(grandTotal)}</span>
             </div>
+            {savingsResult && savingsResult.savings > 0 && (
+              <div className="mt-3 rounded-[10px] bg-paprika/10 px-3 py-2.5 text-xs text-paprika-dim">
+                This order covers {mealsCovered} {mealsCovered === 1 ? 'meal' : 'meals'} — ordered
+                the same way via typical delivery apps, that&apos;d run ~
+                {naira(savingsResult.restaurantEquivalentCost)}. You&apos;re saving{' '}
+                {naira(savingsResult.savings)} ({Math.round(savingsResult.pctSaved * 100)}%).
+              </div>
+            )}
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-3">

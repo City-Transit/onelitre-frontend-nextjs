@@ -1,4 +1,5 @@
 import { formatDate } from '@/lib/format';
+import { OrderReview } from './order-review';
 import type { Order, OrderStatus } from '@/lib/types';
 
 const naira = (n: number) => `₦${n.toLocaleString('en-NG')}`;
@@ -51,6 +52,7 @@ export function MyOrders({ orders }: { orders: Order[] }) {
             <span>Total</span>
             <span>{naira(order.subtotal)}</span>
           </div>
+          <OrderReview order={order} />
         </div>
       ))}
     </div>

@@ -5,8 +5,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { Badge, Vendor } from '@/lib/types';
 import {
+  CERTIFIED_BADGE_ID,
   CUISINE_OPTIONS,
   DELIVERY_TIME_BUCKETS,
+  PRICE_BUCKETS,
+  RATING_BUCKETS,
   formatRatingCount,
   getDeliveryTimeBucket,
   getEstimatedDeliveryMinutes,
@@ -17,20 +20,6 @@ const GRADIENTS = [
   'from-frost/60 to-bg',
   'from-paprika-dim/70 to-bg-alt',
 ];
-
-const PRICE_BUCKETS = [
-  { value: 'under-20k', label: 'Under ₦20,000', test: (p: number) => p < 20000 },
-  { value: '20k-40k', label: '₦20,000–₦40,000', test: (p: number) => p >= 20000 && p <= 40000 },
-  { value: 'over-40k', label: 'Above ₦40,000', test: (p: number) => p > 40000 },
-];
-
-const RATING_BUCKETS = [
-  { value: '4.5', label: '4.5+ stars', min: 4.5 },
-  { value: '4', label: '4+ stars', min: 4 },
-  { value: '3.5', label: '3.5+ stars', min: 3.5 },
-];
-
-const CERTIFIED_BADGE_ID = 'certified';
 
 function cheapestPrice(vendor: Vendor): number | null {
   const prices = vendor.meals.map((item) => item.price);

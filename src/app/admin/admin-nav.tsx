@@ -16,6 +16,7 @@ const TABS = [
   { href: '/admin/team', label: 'Team', minRole: ADMIN_UP },
   { href: '/admin/delivery-fees', label: 'Delivery Fees', minRole: ADMIN_UP },
   { href: '/admin/subscription-plan', label: 'Subscription Plan', minRole: ADMIN_UP },
+  { href: '/admin/savings-benchmark', label: 'Savings Calculator', minRole: ADMIN_UP },
 ];
 
 export function AdminNav({ role }: { role: Role }) {

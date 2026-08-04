@@ -29,7 +29,7 @@ export default async function MenuPage() {
         </h1>
         <p className="mt-4 max-w-xl text-base leading-relaxed text-muted">
           A small first run of bulk, freezer-ready packs from our vetted vendors. Browse a
-          kitchen or search for a dish — pay only when it arrives at your door.
+          kitchen or search for a dish, then pay securely at checkout.
         </p>
 
         <MenuBrowser vendors={vendors} badges={badges} />

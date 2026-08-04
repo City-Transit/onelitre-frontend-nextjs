@@ -1,19 +1,25 @@
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
-import { QtyStepper } from '../qty-stepper';
 import { Reviews } from './reviews';
+import { VendorMenu } from './vendor-menu';
+import { BasketSavingsBanner } from '@/components/basket-savings-banner';
 import { API_BASE_URL } from '@/lib/api-base-url';
 import {
   formatRatingCount,
   getDeliveryTimeBucket,
   getEstimatedDeliveryMinutes,
 } from '@/lib/vendor-options';
-import type { Vendor } from '@/lib/types';
+import type { Badge, Vendor } from '@/lib/types';
 
 async function getVendor(id: string): Promise<Vendor | null> {
   const res = await fetch(`${API_BASE_URL}/vendors/${id}`, { cache: 'no-store' });
   if (res.status === 404) return null;
   if (!res.ok) return null;
+  return res.json();
+}
+
+async function getBadges(): Promise<Badge[]> {
+  const res = await fetch(`${API_BASE_URL}/vendors/badges`, { cache: 'no-store' });
+  if (!res.ok) return [];
   return res.json();
 }
 
@@ -23,7 +29,7 @@ export default async function VendorPage({
   params: Promise<{ vendorId: string }>;
 }) {
   const { vendorId } = await params;
-  const vendor = await getVendor(vendorId);
+  const [vendor, badges] = await Promise.all([getVendor(vendorId), getBadges()]);
   if (!vendor) notFound();
 
   const totalMinutes = getEstimatedDeliveryMinutes(vendor);
@@ -33,7 +39,7 @@ export default async function VendorPage({
 
   return (
     <section className="px-6 pb-24 pt-16">
-      <div className="mx-auto max-w-5xl">
+      <div className="mx-auto max-w-6xl">
         <div className="mb-2 font-mono text-[12.5px] uppercase tracking-[0.14em] text-frost">
           {vendor.area}
         </div>
@@ -81,40 +87,11 @@ export default async function VendorPage({
           )}
         </div>
 
-        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {vendor.meals.map((meal, mi) => (
-            <div
-              key={meal.id}
-              className="flex flex-col overflow-hidden rounded-lg border border-line bg-bg-alt"
-            >
-              <div className="relative aspect-[4/3]">
-                {meal.imageUrl ? (
-                  <Image
-                    src={meal.imageUrl}
-                    alt={meal.name}
-                    fill
-                    sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                    className="object-cover"
-                    priority={mi === 0}
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-paprika/70 to-bg text-4xl">
-                    🍲
-                  </div>
-                )}
-              </div>
-              <div className="flex flex-1 flex-col gap-2 p-5">
-                <h3 className="text-lg leading-snug text-paper">{meal.name}</h3>
-                {meal.description && (
-                  <p className="text-[13px] leading-relaxed text-muted">{meal.description}</p>
-                )}
-                <div className="mt-auto flex flex-wrap gap-2 pt-3">
-                  <QtyStepper size={meal} vendorId={vendor.id} />
-                </div>
-              </div>
-            </div>
-          ))}
+        <div className="lg:hidden">
+          <BasketSavingsBanner meals={vendor.meals} />
         </div>
+
+        <VendorMenu vendor={vendor} badges={badges} />
 
         <Reviews vendorId={vendor.id} />
       </div>

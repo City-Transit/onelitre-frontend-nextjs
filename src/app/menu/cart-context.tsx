@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
 const CART_STORAGE_PREFIX = 'onelitre_cart_';
 /** Abandoned guest carts (nobody signed in) clear themselves out after a day. */
@@ -25,6 +25,9 @@ interface CartContextValue {
   setQty: (mealSizeId: string, qty: number, vendorId: string) => boolean;
   count: number;
   clear: () => void;
+  /** Drops any cart items whose id isn't in `validIds` — self-heals if a listing was deleted,
+   * unapproved, or the id went stale (e.g. a local dev database reseed) since it was added. */
+  prune: (validIds: Set<string>) => void;
   /** Drawer open state lives here (rather than a separate context) so any component — the header
    * button, a "view basket" link, etc. — can open it without its own provider. */
   isDrawerOpen: boolean;
@@ -114,6 +117,24 @@ export function CartProvider({
     window.localStorage.removeItem(storageKey(userId));
   }
 
+  const prune = useCallback(
+    (validIds: Set<string>) => {
+      setState((prev) => {
+        const entries = Object.entries(prev.items).filter(([id]) => validIds.has(id));
+        if (entries.length === Object.keys(prev.items).length) return prev;
+        const items = Object.fromEntries(entries);
+        const next: CartState = {
+          items,
+          vendorId: Object.keys(items).length > 0 ? prev.vendorId : null,
+        };
+        const stored: StoredCart = { ...next, savedAt: Date.now() };
+        window.localStorage.setItem(storageKey(userId), JSON.stringify(stored));
+        return next;
+      });
+    },
+    [userId],
+  );
+
   const count = Object.values(state.items).reduce((sum, qty) => sum + qty, 0);
 
   return (
@@ -124,6 +145,7 @@ export function CartProvider({
         setQty,
         count,
         clear,
+        prune,
         isDrawerOpen,
         openDrawer: () => setIsDrawerOpen(true),
         closeDrawer: () => setIsDrawerOpen(false),

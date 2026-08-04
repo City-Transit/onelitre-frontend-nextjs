@@ -111,6 +111,7 @@ export interface VendorDocument {
 
 export interface Review {
   id: string;
+  orderId: string;
   vendorId: string;
   rating: number;
   comment?: string | null;
@@ -157,6 +158,7 @@ export interface Order {
   notes?: string | null;
   subtotal: number;
   deliveryFee: number;
+  serviceFee: number;
   total: number;
   status: OrderStatus;
   paymentStatus: OrderPaymentStatus;
@@ -170,12 +172,23 @@ export interface Order {
   disputeOutcome?: DisputeOutcome | null;
   createdAt: string;
   items: OrderItem[];
+  /** Only present once this order has been reviewed — reviews are per-order, not per-vendor. */
+  review?: Review | null;
 }
 
 export interface DeliveryFee {
   id: string;
   area: string;
   feeNaira: number;
+  updatedAt: string;
+}
+
+export interface SavingsBenchmark {
+  id: string;
+  avgPricePerMeal: number;
+  avgMealsPerDeliveryOrder: number;
+  avgDeliveryFeePerOrder: number;
+  illustrativeOnelitrePricePerMeal: number;
   updatedAt: string;
 }
 

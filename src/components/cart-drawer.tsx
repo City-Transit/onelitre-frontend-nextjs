@@ -4,14 +4,17 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { apiFetch } from '@/lib/api';
 import { useCart } from '@/app/menu/cart-context';
+import { useSavingsBenchmark } from '@/lib/use-savings-benchmark';
+import { computeSavings } from '@/lib/savings';
 import type { Vendor } from '@/lib/types';
 
 const naira = (n: number) => `₦${n.toLocaleString('en-NG')}`;
 
 export function CartDrawer() {
-  const { cart, vendorId, count, isDrawerOpen, closeDrawer, setQty } = useCart();
+  const { cart, vendorId, count, isDrawerOpen, closeDrawer, setQty, prune } = useCart();
   const [vendor, setVendor] = useState<Vendor | null>(null);
   const [loading, setLoading] = useState(false);
+  const benchmark = useSavingsBenchmark();
 
   useEffect(() => {
     if (!isDrawerOpen || !vendorId) return;
@@ -21,7 +24,9 @@ export function CartDrawer() {
       setLoading(true);
       try {
         const v: Vendor = await apiFetch(`/vendors/${vendorId}`);
-        if (!cancelled) setVendor(v);
+        if (cancelled) return;
+        setVendor(v);
+        prune(new Set(v.meals.map((item) => item.id)));
       } catch {
         if (!cancelled) setVendor(null);
       } finally {
@@ -33,7 +38,7 @@ export function CartDrawer() {
     return () => {
       cancelled = true;
     };
-  }, [isDrawerOpen, vendorId]);
+  }, [isDrawerOpen, vendorId, prune]);
 
   if (!isDrawerOpen) return null;
 
@@ -44,6 +49,8 @@ export function CartDrawer() {
     : [];
 
   const total = lines.reduce((sum, line) => sum + line.item.price * line.quantity, 0);
+  const mealsCovered = lines.reduce((sum, line) => sum + line.item.servings * line.quantity, 0);
+  const savingsResult = benchmark ? computeSavings(mealsCovered, total, benchmark) : null;
 
   return (
     <div className="fixed inset-0 z-[60] flex justify-end">
@@ -117,6 +124,12 @@ export function CartDrawer() {
 
         {count > 0 && (
           <div className="border-t border-line px-6 py-5">
+            {savingsResult && savingsResult.savings > 0 && (
+              <div className="mb-3 font-mono text-xs text-frost">
+                ≈ {mealsCovered} {mealsCovered === 1 ? 'meal' : 'meals'} · save{' '}
+                {naira(savingsResult.savings)} vs. delivery apps
+              </div>
+            )}
             <div className="mb-4 flex justify-between font-serif text-lg text-paper">
               <span>Total</span>
               <span>{naira(total)}</span>
