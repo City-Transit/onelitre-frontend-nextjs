@@ -4,10 +4,12 @@ import { useMemo, useState } from 'react';
 import Image from 'next/image';
 import { QtyStepper } from '../qty-stepper';
 import { VendorBasketPanel } from './vendor-basket-panel';
+import { MultiSelectDropdown } from '@/components/multi-select-dropdown';
 import {
   CERTIFIED_BADGE_ID,
   CUISINE_OPTIONS,
   DELIVERY_TIME_BUCKETS,
+  DIETARY_TAGS,
   PRICE_BUCKETS,
   RATING_BUCKETS,
   getDeliveryTimeBucket,
@@ -24,22 +26,17 @@ export function VendorMenu({ vendor, badges }: { vendor: Vendor; badges: Badge[]
   const [priceBucket, setPriceBucket] = useState('');
   const [minRating, setMinRating] = useState('');
   const [deliveryTimeBucket, setDeliveryTimeBucket] = useState('');
-  const [selectedBadges, setSelectedBadges] = useState<string[]>([]);
+  const [certifications, setCertifications] = useState<string[]>([]);
+  const [dietaryTags, setDietaryTags] = useState<string[]>([]);
 
-  const badgeFilterOptions = [
+  const certificationOptions = [
     { id: CERTIFIED_BADGE_ID, label: 'Certified' },
     ...badges.map((b) => ({ id: b.id, label: b.label })),
   ];
 
-  function toggleBadge(id: string) {
-    setSelectedBadges((prev) =>
-      prev.includes(id) ? prev.filter((b) => b !== id) : [...prev, id],
-    );
-  }
-
-  // Cuisine/rating/delivery-time/badges are vendor-level, not per-item — since this page is
-  // already scoped to one vendor, they can only ever hide or keep the whole menu, not narrow it
-  // further. Only search and price filter the individual items themselves.
+  // Cuisine/rating/delivery-time/certification are vendor-level, not per-item — since this page
+  // is already scoped to one vendor, they can only ever hide or keep the whole menu, not narrow
+  // it further. Search, price, and dietary tag filter the individual items themselves.
   const vendorMatchesFilters = useMemo(() => {
     if (cuisine && !vendor.cuisines?.includes(cuisine)) return false;
 
@@ -58,16 +55,16 @@ export function VendorMenu({ vendor, badges }: { vendor: Vendor; badges: Badge[]
       if (vendorRank === -1 || vendorRank > selectedRank) return false;
     }
 
-    if (selectedBadges.length > 0) {
+    if (certifications.length > 0) {
       const vendorBadgeIds = new Set(vendor.badges?.map((b) => b.id) ?? []);
-      const matchesAny = selectedBadges.some((id) =>
+      const matchesAny = certifications.some((id) =>
         id === CERTIFIED_BADGE_ID ? Boolean(vendor.certifiedAt) : vendorBadgeIds.has(id),
       );
       if (!matchesAny) return false;
     }
 
     return true;
-  }, [vendor, cuisine, minRating, deliveryTimeBucket, selectedBadges]);
+  }, [vendor, cuisine, minRating, deliveryTimeBucket, certifications]);
 
   const filteredMeals = useMemo(() => {
     if (!vendorMatchesFilters) return [];
@@ -86,9 +83,13 @@ export function VendorMenu({ vendor, badges }: { vendor: Vendor; badges: Badge[]
         if (!bucket?.test(meal.price)) return false;
       }
 
+      if (dietaryTags.length > 0 && !dietaryTags.some((tag) => meal.dietaryTags?.includes(tag))) {
+        return false;
+      }
+
       return true;
     });
-  }, [vendor.meals, vendorMatchesFilters, query, priceBucket]);
+  }, [vendor.meals, vendorMatchesFilters, query, priceBucket, dietaryTags]);
 
   return (
     <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_360px]">
@@ -150,27 +151,18 @@ export function VendorMenu({ vendor, badges }: { vendor: Vendor; badges: Badge[]
               </option>
             ))}
           </select>
-        </div>
-
-        <div className="mt-3 flex flex-wrap gap-2">
-          {badgeFilterOptions.map((b) => {
-            const active = selectedBadges.includes(b.id);
-            return (
-              <button
-                key={b.id}
-                type="button"
-                onClick={() => toggleBadge(b.id)}
-                aria-pressed={active}
-                className={`rounded-full border px-3.5 py-1.5 font-mono text-[12px] transition-colors ${
-                  active
-                    ? 'border-frost bg-frost text-bg'
-                    : 'border-line bg-bg-alt text-muted hover:text-paper'
-                }`}
-              >
-                {b.label}
-              </button>
-            );
-          })}
+          <MultiSelectDropdown
+            label="Any certification"
+            options={certificationOptions.map((b) => ({ value: b.id, label: b.label }))}
+            selected={certifications}
+            onChange={setCertifications}
+          />
+          <MultiSelectDropdown
+            label="Any dietary requirement"
+            options={DIETARY_TAGS.map((tag) => ({ value: tag, label: tag }))}
+            selected={dietaryTags}
+            onChange={setDietaryTags}
+          />
         </div>
 
         <div className="mt-6 grid gap-5 sm:grid-cols-2">
@@ -199,6 +191,18 @@ export function VendorMenu({ vendor, badges }: { vendor: Vendor; badges: Badge[]
                 <h3 className="text-lg leading-snug text-paper">{meal.name}</h3>
                 {meal.description && (
                   <p className="text-[13px] leading-relaxed text-muted">{meal.description}</p>
+                )}
+                {meal.dietaryTags && meal.dietaryTags.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {meal.dietaryTags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="rounded-full bg-frost/15 px-2.5 py-0.5 font-mono text-[10.5px] text-frost"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
                 )}
                 <div className="mt-auto flex flex-wrap gap-2 pt-3">
                   <QtyStepper size={meal} vendorId={vendor.id} />
