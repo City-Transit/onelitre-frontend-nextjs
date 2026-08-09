@@ -118,7 +118,7 @@ export function MenuBrowser({ vendors, badges }: { vendors: Vendor[]; badges: Ba
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search vendors or meals — e.g. Jollof Rice, Egusi Soup"
+          placeholder="Search kitchens or meals — e.g. Jollof Rice, Egusi Soup"
           className="w-full max-w-lg rounded-[3px] border border-line bg-bg-alt px-4 py-3.5 text-[15px] text-paper placeholder:text-muted focus:border-frost focus:outline-none"
         />
       </div>
@@ -189,19 +189,19 @@ export function MenuBrowser({ vendors, badges }: { vendors: Vendor[]; badges: Ba
       <div className="mt-8">
         {vendors.length === 0 && (
           <p className="border-t border-line py-12 text-muted">
-            No vendors are live yet — check back soon.
+            No kitchens are live yet — check back soon.
           </p>
         )}
 
         {vendors.length > 0 && filtered.length === 0 && (
           <p className="border-t border-line py-12 text-muted">
             {query
-              ? <>No vendors or meals match &ldquo;{query}&rdquo;.</>
-              : 'No vendors match these filters.'}
+              ? <>No kitchens or meals match &ldquo;{query}&rdquo;.</>
+              : 'No kitchens match these filters.'}
           </p>
         )}
 
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filtered.map((vendor, vi) => {
             const coverImage = vendor.meals.find((m) => m.imageUrl)?.imageUrl;
             const mealCount = vendor.meals.length;

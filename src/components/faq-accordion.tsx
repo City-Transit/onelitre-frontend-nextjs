@@ -5,23 +5,23 @@ import { useState } from 'react';
 const FAQS = [
   {
     q: 'What is Onelitre.ng?',
-    a: 'A platform that aggregates vetted vendors who prepare bulk, freezer-ready meals — ordered on demand and delivered in one drop, instead of paying for a single meal every day.',
+    a: 'A platform that aggregates vetted kitchens who prepare bulk, freezer-ready meals — ordered on demand and delivered in one drop, instead of paying for a single meal every day.',
   },
   {
     q: 'When do you launch?',
-    a: "We're onboarding our first vendors and customers now. Waitlist members get early access before the public launch in Lagos.",
+    a: "We're onboarding our first kitchens and customers now. Waitlist members get early access before the public launch in Lagos.",
   },
   {
     q: 'Which cities are you starting in?',
     a: 'Lagos first. Abuja and Port Harcourt follow once the model is proven — join the waitlist to be notified when we expand to your city.',
   },
   {
-    q: 'How does vendor vetting work?',
-    a: 'Every kitchen is reviewed for food quality, hygiene, and reliability before being listed. We start with a small number of vendors to keep quality high.',
+    q: 'How does kitchen vetting work?',
+    a: 'Every kitchen is reviewed for food quality, hygiene, and reliability before being listed. We start with a small number of kitchens to keep quality high.',
   },
   {
     q: 'Is there a cost to join the waitlist?',
-    a: "No — joining is free for both customers and vendors. We'll only reach out when there's real access to offer.",
+    a: "No — joining is free for both customers and kitchens. We'll only reach out when there's real access to offer.",
   },
 ];
 

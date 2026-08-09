@@ -8,18 +8,12 @@ import {
   getDeliveryTimeBucket,
   getEstimatedDeliveryMinutes,
 } from '@/lib/vendor-options';
-import type { Badge, Vendor } from '@/lib/types';
+import type { Vendor } from '@/lib/types';
 
 async function getVendor(id: string): Promise<Vendor | null> {
   const res = await fetch(`${API_BASE_URL}/vendors/${id}`, { cache: 'no-store' });
   if (res.status === 404) return null;
   if (!res.ok) return null;
-  return res.json();
-}
-
-async function getBadges(): Promise<Badge[]> {
-  const res = await fetch(`${API_BASE_URL}/vendors/badges`, { cache: 'no-store' });
-  if (!res.ok) return [];
   return res.json();
 }
 
@@ -29,7 +23,7 @@ export default async function VendorPage({
   params: Promise<{ vendorId: string }>;
 }) {
   const { vendorId } = await params;
-  const [vendor, badges] = await Promise.all([getVendor(vendorId), getBadges()]);
+  const vendor = await getVendor(vendorId);
   if (!vendor) notFound();
 
   const totalMinutes = getEstimatedDeliveryMinutes(vendor);
@@ -39,7 +33,7 @@ export default async function VendorPage({
 
   return (
     <section className="px-6 pb-24 pt-16">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-7xl">
         <div className="mb-2 font-mono text-[12.5px] uppercase tracking-[0.14em] text-frost">
           {vendor.area}
         </div>
@@ -91,7 +85,7 @@ export default async function VendorPage({
           <BasketSavingsBanner meals={vendor.meals} />
         </div>
 
-        <VendorMenu vendor={vendor} badges={badges} />
+        <VendorMenu vendor={vendor} />
 
         <Reviews vendorId={vendor.id} />
       </div>

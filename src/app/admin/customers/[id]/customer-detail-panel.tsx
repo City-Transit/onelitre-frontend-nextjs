@@ -21,7 +21,7 @@ function OrdersTable({ orders, emptyLabel }: { orders: Order[]; emptyLabel: stri
         <thead className="font-mono text-xs uppercase tracking-wide text-[#5B6B63]">
           <tr>
             <th className="px-4 py-3">Placed</th>
-            <th className="px-4 py-3">Vendor(s)</th>
+            <th className="px-4 py-3">Kitchen(s)</th>
             <th className="px-4 py-3">Date / time</th>
             <th className="px-4 py-3">Total</th>
             <th className="px-4 py-3">Status</th>

@@ -39,7 +39,7 @@ export function PayoutsTable({
       <table className="w-full text-left text-sm">
         <thead className="font-mono text-xs uppercase tracking-wide text-[#5B6B63]">
           <tr>
-            <th className="px-6 py-4">Vendor</th>
+            <th className="px-6 py-4">Kitchen</th>
             <th className="px-6 py-4">Type</th>
             <th className="px-6 py-4">Amount</th>
             <th className="px-6 py-4">Note</th>

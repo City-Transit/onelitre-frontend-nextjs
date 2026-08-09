@@ -1,7 +1,7 @@
-import Link from 'next/link';
 import { SiteHeader } from '@/components/site-header';
 import { FaqAccordion } from '@/components/faq-accordion';
 import { SavingsCalculator } from '@/components/savings-calculator';
+import { HeroCityPicker } from './hero-city-picker';
 
 const TAGS = [
   { name: 'Ogbono Stew', portions: '4 PORTIONS', price: '₦6,500', className: 'top-0 left-[10%] rotate-[-6deg] z-30' },
@@ -12,8 +12,8 @@ const TAGS = [
 const STEPS = [
   {
     idx: '01',
-    title: 'Browse vetted vendors',
-    desc: 'Compare kitchens by cuisine, price, and ratings — every vendor is quality-checked before listing.',
+    title: 'Browse vetted kitchens',
+    desc: 'Compare kitchens by cuisine, price, and ratings — every kitchen is quality-checked before listing.',
     check: 'Discovery',
   },
   {
@@ -48,23 +48,10 @@ export default function Home() {
               Eat all <em className="text-paprika italic">month.</em>
             </h1>
             <p className="mt-6 max-w-[480px] text-lg leading-relaxed text-muted">
-              Bulk, freezer-ready meals from vetted vendors near you — home-cooked quality
+              Bulk, freezer-ready meals from vetted kitchens near you — home-cooked quality
               without the time or skill it takes to make it yourself.
             </p>
-            <div className="mt-9 flex flex-wrap items-center gap-3.5">
-              <Link
-                href="/register"
-                className="inline-flex items-center gap-2.5 rounded-[3px] bg-paprika px-6 py-4 font-mono text-[13.5px] font-bold text-ink transition-all hover:-translate-y-0.5 hover:bg-[#EA8A3E]"
-              >
-                Create your account
-              </Link>
-              <Link
-                href="/login"
-                className="inline-flex items-center gap-2.5 rounded-[3px] border border-line px-6 py-4 font-mono text-[13.5px] font-bold text-paper transition-all hover:-translate-y-0.5 hover:border-frost hover:text-frost"
-              >
-                Log in
-              </Link>
-            </div>
+            <HeroCityPicker />
           </div>
 
           <div className="relative hidden h-[460px] md:block" aria-hidden="true">
@@ -101,7 +88,7 @@ export default function Home() {
               How it works
             </div>
             <h2 className="text-[clamp(30px,3.4vw,42px)] leading-[1.1] text-paper">
-              From vendor kitchen to your freezer.
+              From kitchen to your freezer.
             </h2>
           </div>
           <div className="overflow-hidden rounded-[3px] border border-line">

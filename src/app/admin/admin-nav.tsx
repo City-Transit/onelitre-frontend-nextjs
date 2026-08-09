@@ -7,7 +7,7 @@ import type { Role } from '@/lib/types';
 const ADMIN_UP: Role[] = ['admin', 'super_admin'];
 
 const TABS = [
-  { href: '/admin/vendors', label: 'Vendors' },
+  { href: '/admin/vendors', label: 'Kitchens' },
   { href: '/admin/menu-approvals', label: 'Menu Approvals' },
   { href: '/admin/orders', label: 'Orders' },
   { href: '/admin/payouts', label: 'Payouts' },
