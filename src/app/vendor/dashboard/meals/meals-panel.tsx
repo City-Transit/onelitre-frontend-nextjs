@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { apiFetch } from '@/lib/api';
 import { uploadMealPhoto } from '@/lib/cloudinary-upload';
 import { servingsForLitres } from '@/lib/meal-size-presets';
+import { DIETARY_TAGS } from '@/lib/vendor-options';
 import type { MealSize } from '@/lib/types';
 
 const naira = (n: number) => `₦${n.toLocaleString('en-NG')}`;
@@ -30,11 +31,18 @@ export function MealsPanel({ initialMeals }: { initialMeals: MealSize[] }) {
   const [price, setPrice] = useState('');
   const [note, setNote] = useState('');
   const [ownChannelPrice, setOwnChannelPrice] = useState('');
+  const [dietaryTags, setDietaryTags] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const litresValue = Number(litres);
   const hasValidLitres = litres !== '' && litresValue > 0;
+
+  function toggleDietaryTag(tag: string) {
+    setDietaryTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
+    );
+  }
 
   async function handleCreateMeal(e: React.FormEvent) {
     e.preventDefault();
@@ -56,6 +64,7 @@ export function MealsPanel({ initialMeals }: { initialMeals: MealSize[] }) {
           price: Number(price),
           note: note || undefined,
           ownChannelPrice: ownChannelPrice ? Number(ownChannelPrice) : undefined,
+          dietaryTags: dietaryTags.length > 0 ? dietaryTags : undefined,
         }),
       });
       setMeals((prev) => [...prev, meal]);
@@ -67,6 +76,7 @@ export function MealsPanel({ initialMeals }: { initialMeals: MealSize[] }) {
       setPrice('');
       setNote('');
       setOwnChannelPrice('');
+      setDietaryTags([]);
       router.refresh();
     } catch {
       setError('Could not save meal. Please check the fields and try again.');
@@ -176,6 +186,32 @@ export function MealsPanel({ initialMeals }: { initialMeals: MealSize[] }) {
             different — per your contract, we keep our price within 10% of it.
           </p>
         </div>
+        <div>
+          <label className="text-sm font-semibold">Dietary tags (optional)</label>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {DIETARY_TAGS.map((tag) => {
+              const active = dietaryTags.includes(tag);
+              return (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => toggleDietaryTag(tag)}
+                  aria-pressed={active}
+                  className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                    active
+                      ? 'border-paprika bg-paprika text-white'
+                      : 'border-[rgba(18,33,29,0.14)] bg-paper-dim text-[#5B6B63]'
+                  }`}
+                >
+                  {tag}
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-1 text-xs text-[#8A8073]">
+            Self-declared — pick as many as apply to this specific dish.
+          </p>
+        </div>
         {error && <p className="text-sm text-red-700">{error}</p>}
         <button
           type="submit"
@@ -254,6 +290,18 @@ export function MealsPanel({ initialMeals }: { initialMeals: MealSize[] }) {
                     {overParity ? ' ⚠' : ''}
                   </span>
                 </div>
+                {meal.dietaryTags && meal.dietaryTags.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {meal.dietaryTags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="rounded-full bg-frost/15 px-2.5 py-0.5 text-xs text-frost"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           );

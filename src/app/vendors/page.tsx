@@ -24,13 +24,13 @@ export default function VendorsPage() {
               href="/register?role=vendor"
               className="inline-flex items-center gap-2.5 rounded-[3px] bg-paprika px-6 py-4 font-mono text-[13.5px] font-bold text-ink transition-all hover:-translate-y-0.5 hover:bg-[#EA8A3E]"
             >
-              Become a vendor
+              List your kitchen
             </Link>
             <Link
               href="/login?role=vendor"
               className="inline-flex items-center gap-2.5 rounded-[3px] border border-line px-6 py-4 font-mono text-[13.5px] font-bold text-paper transition-all hover:-translate-y-0.5 hover:border-frost hover:text-frost"
             >
-              Vendor login
+              Kitchen login
             </Link>
           </div>
         </div>

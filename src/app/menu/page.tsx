@@ -19,7 +19,7 @@ export default async function MenuPage() {
 
   return (
     <section className="px-6 pb-24 pt-16">
-      <div className="mx-auto max-w-5xl">
+      <div className="mx-auto max-w-7xl">
         <div className="mb-4 flex items-center gap-2.5 font-mono text-[12.5px] uppercase tracking-[0.14em] text-frost">
           <span className="h-px w-[22px] bg-frost" />
           Pilot batch — Lagos delivery only
@@ -28,7 +28,7 @@ export default async function MenuPage() {
           Pick your kitchen for this batch.
         </h1>
         <p className="mt-4 max-w-xl text-base leading-relaxed text-muted">
-          A small first run of bulk, freezer-ready packs from our vetted vendors. Browse a
+          A small first run of bulk, freezer-ready packs from our vetted kitchens. Browse a
           kitchen or search for a dish, then pay securely at checkout.
         </p>
 

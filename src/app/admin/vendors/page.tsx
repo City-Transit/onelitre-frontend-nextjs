@@ -24,7 +24,7 @@ export default async function AdminVendorsPage({
 
   return (
     <div>
-      <h2 className="mb-4 text-xl text-paper">Vendors</h2>
+      <h2 className="mb-4 text-xl text-paper">Kitchens</h2>
       <VendorsTable initialVendors={data.items} canManage={canManage} />
       <Pagination
         basePath="/admin/vendors"

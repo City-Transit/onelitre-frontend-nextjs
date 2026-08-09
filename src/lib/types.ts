@@ -38,6 +38,8 @@ export interface MealSize {
   note?: string | null;
   /** Vendor's self-certified price on their own channels — platform price should stay within 10% of this. */
   ownChannelPrice?: number | null;
+  /** Self-declared by the vendor per dish — not admin-verified, unlike vendor-level Badge. */
+  dietaryTags?: string[] | null;
   vendorId?: string;
   vendor?: { id: string; name: string };
 }

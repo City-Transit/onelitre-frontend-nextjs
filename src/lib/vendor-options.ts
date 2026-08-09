@@ -83,3 +83,16 @@ export const RATING_BUCKETS = [
 ];
 
 export const CERTIFIED_BADGE_ID = 'certified';
+
+/** Self-declared per-dish attributes — not admin-verified, unlike vendor-level Badges
+ * (Certified/Halal-as-certification/OneLitre+ above). A single dish can carry several at once.
+ * Keep in sync with web/backend/src/vendors/dto/meal-size.dto.ts's DIETARY_TAGS. */
+export const DIETARY_TAGS = [
+  'Gluten Free',
+  'Halal',
+  'Organic',
+  'Kosher',
+  'Vegan friendly',
+  'Vegan',
+  'Vegetarian',
+] as const;

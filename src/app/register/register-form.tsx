@@ -74,7 +74,7 @@ export function RegisterForm() {
       <div className="w-full max-w-md rounded-[20px] bg-paper p-10 text-ink shadow-[0_24px_60px_rgba(18,33,29,0.35)]">
         <h1 className="text-2xl font-semibold">Create your account</h1>
         <p className="mt-2 text-sm text-[#5B6B63]">
-          Join Onelitre.ng to order bulk, freezer-ready meals from vetted vendors — or list
+          Join Onelitre.ng to order bulk, freezer-ready meals from vetted kitchens — or list
           your kitchen.
         </p>
         <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-5">
@@ -101,7 +101,7 @@ export function RegisterForm() {
                     : 'border-[rgba(18,33,29,0.14)] bg-paper-dim text-ink'
                 }`}
               >
-                Vendor
+                Kitchen
               </button>
             </div>
           </div>

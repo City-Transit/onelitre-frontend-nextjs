@@ -72,7 +72,7 @@ export function MealApprovalsTable({ initialMeals }: { initialMeals: MealSize[] 
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <div className="text-xs font-semibold uppercase tracking-wide text-[#8A8073]">
-                {meal.vendor?.name ?? 'Unknown vendor'}
+                {meal.vendor?.name ?? 'Unknown kitchen'}
               </div>
               <h3 className="mt-1 text-lg font-semibold">{meal.name}</h3>
               {meal.description && (

@@ -4,10 +4,12 @@ import { useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Badge, Vendor } from '@/lib/types';
+import { MultiSelectDropdown } from '@/components/multi-select-dropdown';
 import {
   CERTIFIED_BADGE_ID,
   CUISINE_OPTIONS,
   DELIVERY_TIME_BUCKETS,
+  DIETARY_TAGS,
   PRICE_BUCKETS,
   RATING_BUCKETS,
   formatRatingCount,
@@ -35,18 +37,13 @@ export function MenuBrowser({ vendors, badges }: { vendors: Vendor[]; badges: Ba
   const [priceBucket, setPriceBucket] = useState('');
   const [minRating, setMinRating] = useState('');
   const [deliveryTimeBucket, setDeliveryTimeBucket] = useState('');
-  const [selectedBadges, setSelectedBadges] = useState<string[]>([]);
+  const [certifications, setCertifications] = useState<string[]>([]);
+  const [dietaryTags, setDietaryTags] = useState<string[]>([]);
 
-  const badgeFilterOptions = [
+  const certificationOptions = [
     { id: CERTIFIED_BADGE_ID, label: 'Certified' },
     ...badges.map((b) => ({ id: b.id, label: b.label })),
   ];
-
-  function toggleBadge(id: string) {
-    setSelectedBadges((prev) =>
-      prev.includes(id) ? prev.filter((b) => b !== id) : [...prev, id],
-    );
-  }
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -86,17 +83,33 @@ export function MenuBrowser({ vendors, badges }: { vendors: Vendor[]; badges: Ba
         if (vendorRank === -1 || vendorRank > selectedRank) return false;
       }
 
-      if (selectedBadges.length > 0) {
+      if (certifications.length > 0) {
         const vendorBadgeIds = new Set(vendor.badges?.map((b) => b.id) ?? []);
-        const matchesAny = selectedBadges.some((id) =>
+        const matchesAny = certifications.some((id) =>
           id === CERTIFIED_BADGE_ID ? Boolean(vendor.certifiedAt) : vendorBadgeIds.has(id),
         );
         if (!matchesAny) return false;
       }
 
+      if (dietaryTags.length > 0) {
+        const hasAny = vendor.meals.some((meal) =>
+          dietaryTags.some((tag) => meal.dietaryTags?.includes(tag)),
+        );
+        if (!hasAny) return false;
+      }
+
       return true;
     });
-  }, [vendors, query, cuisine, priceBucket, minRating, deliveryTimeBucket, selectedBadges]);
+  }, [
+    vendors,
+    query,
+    cuisine,
+    priceBucket,
+    minRating,
+    deliveryTimeBucket,
+    certifications,
+    dietaryTags,
+  ]);
 
   return (
     <>
@@ -105,7 +118,7 @@ export function MenuBrowser({ vendors, badges }: { vendors: Vendor[]; badges: Ba
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search vendors or meals — e.g. Jollof Rice, Egusi Soup"
+          placeholder="Search kitchens or meals — e.g. Jollof Rice, Egusi Soup"
           className="w-full max-w-lg rounded-[3px] border border-line bg-bg-alt px-4 py-3.5 text-[15px] text-paper placeholder:text-muted focus:border-frost focus:outline-none"
         />
       </div>
@@ -159,45 +172,36 @@ export function MenuBrowser({ vendors, badges }: { vendors: Vendor[]; badges: Ba
             </option>
           ))}
         </select>
-      </div>
-
-      <div className="mt-3 flex flex-wrap gap-2">
-        {badgeFilterOptions.map((b) => {
-          const active = selectedBadges.includes(b.id);
-          return (
-            <button
-              key={b.id}
-              type="button"
-              onClick={() => toggleBadge(b.id)}
-              aria-pressed={active}
-              className={`rounded-full border px-3.5 py-1.5 font-mono text-[12px] transition-colors ${
-                active
-                  ? 'border-frost bg-frost text-bg'
-                  : 'border-line bg-bg-alt text-muted hover:text-paper'
-              }`}
-            >
-              {b.label}
-            </button>
-          );
-        })}
+        <MultiSelectDropdown
+          label="Any certification"
+          options={certificationOptions.map((b) => ({ value: b.id, label: b.label }))}
+          selected={certifications}
+          onChange={setCertifications}
+        />
+        <MultiSelectDropdown
+          label="Any dietary requirement"
+          options={DIETARY_TAGS.map((tag) => ({ value: tag, label: tag }))}
+          selected={dietaryTags}
+          onChange={setDietaryTags}
+        />
       </div>
 
       <div className="mt-8">
         {vendors.length === 0 && (
           <p className="border-t border-line py-12 text-muted">
-            No vendors are live yet — check back soon.
+            No kitchens are live yet — check back soon.
           </p>
         )}
 
         {vendors.length > 0 && filtered.length === 0 && (
           <p className="border-t border-line py-12 text-muted">
             {query
-              ? <>No vendors or meals match &ldquo;{query}&rdquo;.</>
-              : 'No vendors match these filters.'}
+              ? <>No kitchens or meals match &ldquo;{query}&rdquo;.</>
+              : 'No kitchens match these filters.'}
           </p>
         )}
 
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filtered.map((vendor, vi) => {
             const coverImage = vendor.meals.find((m) => m.imageUrl)?.imageUrl;
             const mealCount = vendor.meals.length;

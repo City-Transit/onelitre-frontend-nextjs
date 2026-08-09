@@ -330,7 +330,7 @@ export function DispatchOrdersTable({ initialOrders }: { initialOrders: Order[] 
                             disabled={busyId === order.id}
                             className="rounded-full border border-[rgba(18,33,29,0.2)] px-3 py-1.5 text-xs font-semibold disabled:opacity-60"
                           >
-                            Dismiss (pay vendor)
+                            Dismiss (pay kitchen)
                           </button>
                           <button
                             onClick={() => resolveDispute(order.id, 'upheld')}
@@ -363,7 +363,7 @@ export function DispatchOrdersTable({ initialOrders }: { initialOrders: Order[] 
                   </div>
                 ) : (
                   <div className="text-right text-xs text-[#8A8073]">
-                    {order.status === 'placed' ? 'Awaiting vendor' : '—'}
+                    {order.status === 'placed' ? 'Awaiting kitchen' : '—'}
                   </div>
                 )}
               </td>

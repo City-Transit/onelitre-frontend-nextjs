@@ -27,7 +27,7 @@ const manrope = Manrope({
 export const metadata: Metadata = {
   title: "Onelitre.ng — Cook once. Eat all month.",
   description:
-    "Bulk, freezer-ready meals from vetted vendors near you — home-cooked quality without the time or skill it takes to make it yourself.",
+    "Bulk, freezer-ready meals from vetted kitchens near you — home-cooked quality without the time or skill it takes to make it yourself.",
 };
 
 async function getCurrentUserId(): Promise<string | null> {

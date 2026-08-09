@@ -104,7 +104,7 @@ export function SavingsBenchmarkForm({ benchmark }: { benchmark: SavingsBenchmar
         </div>
       </div>
       <p className="text-xs text-[#8A8073]">
-        These drive the savings-calculator messaging shown on the homepage, vendor menu pages,
+        These drive the savings-calculator messaging shown on the homepage, kitchen menu pages,
         basket, and checkout. The illustrative Onelitre price is only used on the homepage, where
         there&apos;s no real basket yet to compute an actual price from.
       </p>

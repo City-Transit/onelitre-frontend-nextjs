@@ -52,7 +52,7 @@ export function LoginForm() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-6 py-16">
       <div className="w-full max-w-md rounded-[20px] bg-paper p-10 text-ink shadow-[0_24px_60px_rgba(18,33,29,0.35)]">
-        <h1 className="text-2xl font-semibold">{isVendor ? 'Vendor login' : 'Log in'}</h1>
+        <h1 className="text-2xl font-semibold">{isVendor ? 'Kitchen login' : 'Log in'}</h1>
         <p className="mt-2 text-sm text-[#5B6B63]">
           {isVendor
             ? 'Welcome back — sign in to your kitchen dashboard.'

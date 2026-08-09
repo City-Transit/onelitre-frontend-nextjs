@@ -53,10 +53,10 @@ export function CreatePayoutForm() {
       <h3 className="text-lg font-semibold">Record a payout</h3>
       <div className="flex gap-4">
         <div className="w-full">
-          <label className="text-sm font-semibold">Vendor ID</label>
+          <label className="text-sm font-semibold">Kitchen ID</label>
           <input
             required
-            placeholder="Paste the vendor's id from their detail page"
+            placeholder="Paste the kitchen's id from their detail page"
             value={vendorId}
             onChange={(e) => setVendorId(e.target.value)}
             className={`${inputClass} mt-1`}

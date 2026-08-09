@@ -23,7 +23,7 @@ export default async function VendorDashboardLayout({
         <div className="flex items-center justify-between">
           <div>
             <div className="font-mono text-[12.5px] uppercase tracking-[0.14em] text-frost">
-              Vendor dashboard
+              Kitchen dashboard
             </div>
             <h1 className="mt-2 text-2xl text-paper">{vendor.name}</h1>
             {(vendor.address || vendor.area) && (

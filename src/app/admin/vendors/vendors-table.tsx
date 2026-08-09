@@ -36,7 +36,7 @@ export function VendorsTable({
   if (vendors.length === 0) {
     return (
       <div className="rounded-[20px] bg-paper p-8 text-center text-sm text-[#5B6B63] shadow-[0_24px_60px_rgba(18,33,29,0.35)]">
-        No vendors yet.
+        No kitchens yet.
       </div>
     );
   }

@@ -70,7 +70,7 @@ function VendorOrdersTable({
             <th className="px-4 py-3">Placed</th>
             <th className="px-4 py-3">Delivery address</th>
             <th className="px-4 py-3">Date / time</th>
-            <th className="px-4 py-3">Vendor total</th>
+            <th className="px-4 py-3">Kitchen total</th>
             <th className="px-4 py-3">Status</th>
           </tr>
         </thead>
