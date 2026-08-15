@@ -11,7 +11,7 @@ export function QtyStepper({ size, vendorId }: { size: MealSize; vendorId: strin
 
   return (
     <div
-      className="flex items-center gap-2 rounded-full border border-line px-1 py-1 font-mono text-[14px] font-semibold text-paper"
+      className="flex items-center gap-2 rounded-full border border-line px-1 py-1 font-mono text-[13px] text-paper"
       title={size.note ?? undefined}
     >
       <span className="pl-2">

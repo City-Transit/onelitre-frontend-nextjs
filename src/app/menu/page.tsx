@@ -27,7 +27,7 @@ export default async function MenuPage({
 
   return (
     <section className="px-6 pb-24 pt-16">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto max-w-[1600px]">
         <div className="mb-4 flex items-center gap-2.5 font-mono text-[12.5px] uppercase tracking-[0.14em] text-frost">
           <span className="h-px w-[22px] bg-frost" />
           Pilot batch — Lagos delivery only

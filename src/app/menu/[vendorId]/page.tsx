@@ -33,7 +33,7 @@ export default async function VendorPage({
 
   return (
     <section className="px-6 pb-24 pt-16">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto max-w-[1600px]">
         <div className="mb-2 font-mono text-[12.5px] uppercase tracking-[0.14em] text-frost">
           {vendor.area}
         </div>
