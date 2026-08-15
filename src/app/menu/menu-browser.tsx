@@ -23,15 +23,21 @@ const GRADIENTS = [
   'from-paprika-dim/70 to-bg-alt',
 ];
 
-function cheapestPrice(vendor: Vendor): number | null {
-  const prices = vendor.meals.map((item) => item.price);
-  return prices.length > 0 ? Math.min(...prices) : null;
-}
-
 const selectClass =
   'rounded-[3px] border border-line bg-bg-alt px-3 py-2.5 text-[13.5px] text-paper focus:border-frost focus:outline-none';
 
-export function MenuBrowser({ vendors, badges }: { vendors: Vendor[]; badges: Badge[] }) {
+export function MenuBrowser({
+  vendors,
+  badges,
+  priorityArea,
+}: {
+  vendors: Vendor[];
+  badges: Badge[];
+  /** Local government picked on the homepage's coverage-check gate (see hero-city-picker.tsx) —
+   * matching kitchens are sorted first rather than filtered exclusively, since we don't have real
+   * geo-distance data, just a text match against `vendor.area` ("Ogba, Lagos" etc). */
+  priorityArea?: string;
+}) {
   const [query, setQuery] = useState('');
   const [cuisine, setCuisine] = useState('');
   const [priceBucket, setPriceBucket] = useState('');
@@ -63,9 +69,9 @@ export function MenuBrowser({ vendors, badges }: { vendors: Vendor[]; badges: Ba
       if (cuisine && !vendor.cuisines?.includes(cuisine)) return false;
 
       if (priceBucket) {
-        const price = cheapestPrice(vendor);
         const bucket = PRICE_BUCKETS.find((b) => b.value === priceBucket);
-        if (price === null || !bucket?.test(price)) return false;
+        const hasMatchingItem = vendor.meals.some((meal) => bucket?.test(meal.price));
+        if (!hasMatchingItem) return false;
       }
 
       if (minRating) {
@@ -110,6 +116,19 @@ export function MenuBrowser({ vendors, badges }: { vendors: Vendor[]; badges: Ba
     certifications,
     dietaryTags,
   ]);
+
+  const sorted = useMemo(() => {
+    if (!priorityArea) return filtered;
+    const matchesArea = (vendor: Vendor) =>
+      (vendor.area ?? '').toLowerCase().startsWith(priorityArea.toLowerCase());
+    // Stable sort — ties (both match, or both don't) keep their existing relative order.
+    return [...filtered].sort((a, b) => Number(matchesArea(b)) - Number(matchesArea(a)));
+  }, [filtered, priorityArea]);
+
+  const nearbyCount = priorityArea
+    ? sorted.filter((v) => (v.area ?? '').toLowerCase().startsWith(priorityArea.toLowerCase()))
+        .length
+    : 0;
 
   return (
     <>
@@ -193,7 +212,7 @@ export function MenuBrowser({ vendors, badges }: { vendors: Vendor[]; badges: Ba
           </p>
         )}
 
-        {vendors.length > 0 && filtered.length === 0 && (
+        {vendors.length > 0 && sorted.length === 0 && (
           <p className="border-t border-line py-12 text-muted">
             {query
               ? <>No kitchens or meals match &ldquo;{query}&rdquo;.</>
@@ -201,8 +220,16 @@ export function MenuBrowser({ vendors, badges }: { vendors: Vendor[]; badges: Ba
           </p>
         )}
 
+        {priorityArea && sorted.length > 0 && (
+          <p className="border-t border-line py-4 font-mono text-xs text-frost">
+            {nearbyCount > 0
+              ? `Showing kitchens near ${priorityArea} first`
+              : `No kitchens in ${priorityArea} yet — showing all kitchens`}
+          </p>
+        )}
+
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filtered.map((vendor, vi) => {
+          {sorted.map((vendor, vi) => {
             const coverImage = vendor.meals.find((m) => m.imageUrl)?.imageUrl;
             const mealCount = vendor.meals.length;
             return (

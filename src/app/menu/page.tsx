@@ -14,8 +14,16 @@ async function getBadges(): Promise<Badge[]> {
   return res.json();
 }
 
-export default async function MenuPage() {
-  const [vendors, badges] = await Promise.all([getVendors(), getBadges()]);
+export default async function MenuPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ area?: string }>;
+}) {
+  const [{ area }, vendors, badges] = await Promise.all([
+    searchParams,
+    getVendors(),
+    getBadges(),
+  ]);
 
   return (
     <section className="px-6 pb-24 pt-16">
@@ -32,7 +40,7 @@ export default async function MenuPage() {
           kitchen or search for a dish, then pay securely at checkout.
         </p>
 
-        <MenuBrowser vendors={vendors} badges={badges} />
+        <MenuBrowser vendors={vendors} badges={badges} priorityArea={area} />
       </div>
     </section>
   );

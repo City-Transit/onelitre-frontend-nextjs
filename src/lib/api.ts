@@ -10,7 +10,15 @@ export class ApiError extends Error {
   }
 }
 
-const NO_REFRESH_PATHS = new Set(['/auth/login', '/auth/register', '/auth/refresh']);
+const NO_REFRESH_PATHS = new Set([
+  '/auth/login',
+  '/auth/register',
+  '/auth/refresh',
+  '/auth/forgot-password',
+  '/auth/reset-password',
+  '/auth/verify-phone',
+  '/auth/resend-verification',
+]);
 
 // Coalesces concurrent 401s into a single refresh call rather than firing one per request.
 let refreshPromise: Promise<boolean> | null = null;

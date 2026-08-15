@@ -1,6 +1,8 @@
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { serverApiFetch } from '@/lib/server-api';
 import { BasketButton } from './basket-button';
+import { ViewKitchensLink } from './view-kitchens-link';
 import type { User } from '@/lib/types';
 
 const DASHBOARD_BY_ROLE: Record<User['role'], string> = {
@@ -24,9 +26,9 @@ export async function SiteHeader() {
           Onelitre.ng
         </Link>
         <nav className="flex items-center gap-5 font-mono text-[13px]">
-          <Link href="/menu" className="text-paper transition-colors hover:text-frost">
-            View kitchens
-          </Link>
+          <Suspense fallback={null}>
+            <ViewKitchensLink />
+          </Suspense>
           <BasketButton />
           {user ? (
             <Link

@@ -31,13 +31,18 @@ export function LoginForm() {
     setError(null);
     setSubmitting(true);
     try {
-      const { user, accessToken, refreshToken }: { user: User; accessToken: string; refreshToken: string } =
-        await apiFetch('/auth/login', {
-          method: 'POST',
-          body: JSON.stringify({ identifier, password }),
-        });
-      setSessionTokens(accessToken, refreshToken);
-      router.push(DASHBOARD_BY_ROLE[user.role]);
+      const result:
+        | { requiresVerification: true; phone: string }
+        | { user: User; accessToken: string; refreshToken: string } = await apiFetch(
+        '/auth/login',
+        { method: 'POST', body: JSON.stringify({ identifier, password }) },
+      );
+      if ('requiresVerification' in result) {
+        router.push(`/verify-phone?phone=${encodeURIComponent(result.phone)}`);
+        return;
+      }
+      setSessionTokens(result.accessToken, result.refreshToken);
+      router.push(DASHBOARD_BY_ROLE[result.user.role]);
       router.refresh();
     } catch (err) {
       setError(
@@ -73,7 +78,14 @@ export function LoginForm() {
             />
           </div>
           <div className="flex flex-col gap-2.5">
-            <label className="font-semibold text-[14.5px]">Password</label>
+            <div className="flex items-center justify-between">
+              <label className="font-semibold text-[14.5px]">Password</label>
+              {!isVendor && (
+                <Link href="/forgot-password" className="text-[13px] font-semibold text-ink underline">
+                  Forgot password?
+                </Link>
+              )}
+            </div>
             <input
               required
               type="password"

@@ -10,6 +10,7 @@ export interface Paginated<T> {
 export interface User {
   id: string;
   phone?: string | null;
+  phoneVerifiedAt?: string | null;
   email?: string | null;
   role: Role;
   isActive?: boolean;
