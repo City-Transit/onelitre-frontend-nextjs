@@ -1,18 +1,28 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { COMING_SOON_CITIES, LAGOS_AREAS, LIVE_CITY } from '@/lib/locations';
 
 const selectClass =
   'rounded-[3px] border border-line bg-bg-alt px-4 py-3.5 font-mono text-[13.5px] text-paper focus:border-frost focus:outline-none';
 
 /** Coverage-check gate — this is a launch-in-one-city product, so the homepage's primary CTA
- * leads with "are we in your area?" rather than a generic sign-up button. Log in stays reachable
- * from the site header, unaffected by this. */
+ * leads with "are we in your area?" rather than a generic sign-up button. Picking a local
+ * government takes the visitor straight to the kitchen list (kitchens near that area sorted
+ * first — see menu-browser.tsx), no extra click needed. Log in/sign up stay reachable from the
+ * site header regardless. */
 export function HeroCityPicker() {
+  const router = useRouter();
   const [city, setCity] = useState(LIVE_CITY);
   const [area, setArea] = useState('');
+
+  function handleAreaChange(value: string) {
+    setArea(value);
+    if (value) {
+      router.push(`/menu?area=${encodeURIComponent(value)}`);
+    }
+  }
 
   return (
     <div className="mt-9">
@@ -31,7 +41,7 @@ export function HeroCityPicker() {
         </select>
         <select
           value={area}
-          onChange={(e) => setArea(e.target.value)}
+          onChange={(e) => handleAreaChange(e.target.value)}
           className={selectClass}
         >
           <option value="" disabled>
@@ -45,18 +55,9 @@ export function HeroCityPicker() {
         </select>
       </div>
 
-      {area ? (
-        <Link
-          href="/register"
-          className="mt-4 inline-flex items-center gap-2.5 rounded-[3px] bg-paprika px-6 py-4 font-mono text-[13.5px] font-bold text-ink transition-all hover:-translate-y-0.5 hover:bg-[#EA8A3E]"
-        >
-          Create your account
-        </Link>
-      ) : (
-        <p className="mt-4 text-sm text-muted">
-          Pick your local government above to get started.
-        </p>
-      )}
+      <p className="mt-4 text-sm text-muted">
+        Pick your local government above to see kitchens near you.
+      </p>
     </div>
   );
 }
