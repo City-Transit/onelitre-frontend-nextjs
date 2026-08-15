@@ -37,8 +37,8 @@ export interface MealSize {
   price: number;
   servings: number;
   note?: string | null;
-  /** Vendor's self-certified price on their own channels — platform price should stay within 10% of this. */
-  ownChannelPrice?: number | null;
+  /** Optional — only needed for kitchens whose dishes span more than one of their own cuisine tags. */
+  cuisine?: string | null;
   /** Self-declared by the vendor per dish — not admin-verified, unlike vendor-level Badge. */
   dietaryTags?: string[] | null;
   vendorId?: string;
@@ -62,7 +62,6 @@ export interface Vendor {
   cuisines?: string[] | null;
   badges?: Badge[];
   estimatedPrepMinutes?: number | null;
-  estimatedDeliveryMinutes?: number | null;
   contractAcceptedAt?: string | null;
   contractDeclinedAt?: string | null;
   contractSignatureName?: string | null;

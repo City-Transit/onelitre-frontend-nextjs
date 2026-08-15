@@ -3,7 +3,7 @@
  * accepting/declining. Not reviewed by a lawyer; replace with actual counsel-approved terms
  * before this is treated as binding.
  */
-export const VENDOR_CONTRACT_VERSION = '2026-07-18-draft';
+export const VENDOR_CONTRACT_VERSION = '2026-08-15-draft';
 
 export interface EffectiveSplit {
   advancePct: number;
@@ -68,7 +68,7 @@ export function buildContractSections(
     },
     {
       heading: '11. Price parity',
-      body: 'Your price on Onelitre should not be more than 10% above what you charge for the same item through your own channels (WhatsApp, in-person, etc.). You self-certify your own-channel price for each listing; Onelitre monitors this on a complaint basis rather than blocking listings automatically, and repeated, confirmed violations may result in a quality dispute (§10).',
+      body: 'Your price on Onelitre should not be more than 10% above what you charge for the same item through your own channels (WhatsApp, in-person, etc.). Onelitre monitors this on a complaint basis rather than blocking listings automatically, and repeated, confirmed violations may result in a quality dispute (§10).',
     },
     {
       heading: '12. Ending this agreement',

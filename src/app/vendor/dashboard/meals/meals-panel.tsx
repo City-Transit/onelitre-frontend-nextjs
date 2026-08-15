@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { apiFetch } from '@/lib/api';
 import { uploadMealPhoto } from '@/lib/cloudinary-upload';
 import { servingsForLitres } from '@/lib/meal-size-presets';
-import { DIETARY_TAGS } from '@/lib/vendor-options';
+import { CUISINE_OPTIONS, DIETARY_TAGS } from '@/lib/vendor-options';
 import type { MealSize } from '@/lib/types';
 
 const naira = (n: number) => `₦${n.toLocaleString('en-NG')}`;
@@ -30,7 +30,7 @@ export function MealsPanel({ initialMeals }: { initialMeals: MealSize[] }) {
   const [litres, setLitres] = useState('');
   const [price, setPrice] = useState('');
   const [note, setNote] = useState('');
-  const [ownChannelPrice, setOwnChannelPrice] = useState('');
+  const [cuisine, setCuisine] = useState('');
   const [dietaryTags, setDietaryTags] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,7 +63,7 @@ export function MealsPanel({ initialMeals }: { initialMeals: MealSize[] }) {
           litres: Number(litres),
           price: Number(price),
           note: note || undefined,
-          ownChannelPrice: ownChannelPrice ? Number(ownChannelPrice) : undefined,
+          cuisine: cuisine || undefined,
           dietaryTags: dietaryTags.length > 0 ? dietaryTags : undefined,
         }),
       });
@@ -75,7 +75,7 @@ export function MealsPanel({ initialMeals }: { initialMeals: MealSize[] }) {
       setLitres('');
       setPrice('');
       setNote('');
-      setOwnChannelPrice('');
+      setCuisine('');
       setDietaryTags([]);
       router.refresh();
     } catch {
@@ -170,20 +170,27 @@ export function MealsPanel({ initialMeals }: { initialMeals: MealSize[] }) {
               onChange={(e) => setNote(e.target.value)}
               className={inputClass}
             />
-            <input
-              type="number"
-              placeholder="Your own-channel price (₦, optional)"
-              value={ownChannelPrice}
-              onChange={(e) => setOwnChannelPrice(e.target.value)}
-              className={inputClass}
-            />
             <span className="w-24 shrink-0 whitespace-nowrap text-xs text-[#5B6B63]">
               {hasValidLitres ? `${servingsForLitres(litresValue)} meals` : ''}
             </span>
           </div>
+        </div>
+        <div>
+          <label className="text-sm font-semibold">Cuisine (optional)</label>
+          <select
+            value={cuisine}
+            onChange={(e) => setCuisine(e.target.value)}
+            className={`${inputClass} mt-1`}
+          >
+            <option value="">No specific cuisine</option>
+            {CUISINE_OPTIONS.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
           <p className="mt-1 text-xs text-[#8A8073]">
-            Own-channel price is what you charge for this size on WhatsApp/in-person, if
-            different — per your contract, we keep our price within 10% of it.
+            Only needed if this dish doesn&apos;t match your kitchen&apos;s usual cuisine.
           </p>
         </div>
         <div>
@@ -228,8 +235,6 @@ export function MealsPanel({ initialMeals }: { initialMeals: MealSize[] }) {
           <p className="text-sm text-[#5B6B63]">No meals yet — add your first one above.</p>
         )}
         {meals.map((meal) => {
-          const overParity =
-            meal.ownChannelPrice != null && meal.price > meal.ownChannelPrice * 1.1;
           return (
             <div
               key={meal.id}
@@ -275,20 +280,15 @@ export function MealsPanel({ initialMeals }: { initialMeals: MealSize[] }) {
                 {meal.description && (
                   <p className="text-sm text-[#5B6B63]">{meal.description}</p>
                 )}
-                <div className="mt-2">
-                  <span
-                    className={`rounded-full px-3 py-1 font-mono text-xs ${
-                      overParity ? 'bg-red-100 text-red-700' : 'bg-paper-dim'
-                    }`}
-                    title={
-                      overParity
-                        ? `More than 10% above your own-channel price of ${naira(meal.ownChannelPrice!)}`
-                        : undefined
-                    }
-                  >
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  <span className="rounded-full bg-paper-dim px-3 py-1 font-mono text-xs">
                     {meal.litres}L · {meal.servings} meals · {naira(meal.price)}
-                    {overParity ? ' ⚠' : ''}
                   </span>
+                  {meal.cuisine && (
+                    <span className="rounded-full bg-paper-dim px-3 py-1 font-mono text-xs">
+                      {meal.cuisine}
+                    </span>
+                  )}
                 </div>
                 {meal.dietaryTags && meal.dietaryTags.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1.5">
