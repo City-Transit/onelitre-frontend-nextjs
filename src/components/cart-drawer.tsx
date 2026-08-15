@@ -1,55 +1,20 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { apiFetch } from '@/lib/api';
 import { useCart } from '@/app/menu/cart-context';
+import { useCartTotals } from '@/lib/use-cart-totals';
 import { useSavingsBenchmark } from '@/lib/use-savings-benchmark';
 import { computeSavings } from '@/lib/savings';
-import type { Vendor } from '@/lib/types';
 
 const naira = (n: number) => `₦${n.toLocaleString('en-NG')}`;
 
 export function CartDrawer() {
-  const { cart, vendorId, count, isDrawerOpen, closeDrawer, setQty, prune } = useCart();
-  const [vendor, setVendor] = useState<Vendor | null>(null);
-  const [loading, setLoading] = useState(false);
+  const { vendorId, count, isDrawerOpen, closeDrawer, setQty } = useCart();
+  const { lines, total, mealsCovered, loading } = useCartTotals();
   const benchmark = useSavingsBenchmark();
-
-  useEffect(() => {
-    if (!isDrawerOpen || !vendorId) return;
-    let cancelled = false;
-
-    async function loadVendor() {
-      setLoading(true);
-      try {
-        const v: Vendor = await apiFetch(`/vendors/${vendorId}`);
-        if (cancelled) return;
-        setVendor(v);
-        prune(new Set(v.meals.map((item) => item.id)));
-      } catch {
-        if (!cancelled) setVendor(null);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-    loadVendor();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [isDrawerOpen, vendorId, prune]);
 
   if (!isDrawerOpen) return null;
 
-  const lines = vendor
-    ? vendor.meals
-        .filter((item) => (cart[item.id] ?? 0) > 0)
-        .map((item) => ({ item, quantity: cart[item.id] }))
-    : [];
-
-  const total = lines.reduce((sum, line) => sum + line.item.price * line.quantity, 0);
-  const mealsCovered = lines.reduce((sum, line) => sum + line.item.servings * line.quantity, 0);
   const savingsResult = benchmark ? computeSavings(mealsCovered, total, benchmark) : null;
 
   return (
