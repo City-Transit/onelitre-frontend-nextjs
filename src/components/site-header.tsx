@@ -13,7 +13,7 @@ export async function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-bg/90 backdrop-blur">
-      <div className="relative mx-auto flex max-w-5xl items-center justify-between px-6 py-5">
+      <div className="relative mx-auto flex max-w-[1600px] items-center justify-between px-6 py-5">
         <Link href="/" className="flex items-center gap-2.5 font-serif text-lg font-semibold">
           <span className="inline-block h-[9px] w-[9px] rounded-full bg-paprika shadow-[0_0_0_3px_rgba(217,118,43,0.25)]" />
           Onelitre.ng
