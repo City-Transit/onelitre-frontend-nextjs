@@ -1,18 +1,11 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { serverApiFetch } from '@/lib/server-api';
+import { DASHBOARD_BY_ROLE } from '@/lib/dashboard-routes';
 import { BasketButton } from './basket-button';
+import { MobileNav } from './mobile-nav';
 import { ViewKitchensLink } from './view-kitchens-link';
 import type { User } from '@/lib/types';
-
-const DASHBOARD_BY_ROLE: Record<User['role'], string> = {
-  customer: '/dashboard',
-  vendor: '/vendor/dashboard',
-  staff: '/admin',
-  supervisor: '/admin',
-  admin: '/admin',
-  super_admin: '/admin',
-};
 
 export async function SiteHeader() {
   const res = await serverApiFetch('/auth/me');
@@ -20,12 +13,13 @@ export async function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-bg/90 backdrop-blur">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-5">
+      <div className="relative mx-auto flex max-w-5xl items-center justify-between px-6 py-5">
         <Link href="/" className="flex items-center gap-2.5 font-serif text-lg font-semibold">
           <span className="inline-block h-[9px] w-[9px] rounded-full bg-paprika shadow-[0_0_0_3px_rgba(217,118,43,0.25)]" />
           Onelitre.ng
         </Link>
-        <nav className="flex items-center gap-5 font-mono text-[13px]">
+        <MobileNav user={user} />
+        <nav className="hidden items-center gap-5 font-mono text-[13px] sm:flex">
           <Suspense fallback={null}>
             <ViewKitchensLink />
           </Suspense>

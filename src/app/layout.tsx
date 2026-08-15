@@ -4,6 +4,7 @@ import "./globals.css";
 import { serverApiFetch } from "@/lib/server-api";
 import { CartProvider } from "./menu/cart-context";
 import { CartDrawer } from "@/components/cart-drawer";
+import { MobileBasketBar } from "@/components/mobile-basket-bar";
 
 const fraunces = Fraunces({
   variable: "--font-fraunces",
@@ -53,6 +54,7 @@ export default async function RootLayout({
         <CartProvider userId={userId}>
           {children}
           <CartDrawer />
+          <MobileBasketBar />
         </CartProvider>
       </body>
     </html>
