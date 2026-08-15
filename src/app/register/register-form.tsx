@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { apiFetch, ApiError } from '@/lib/api';
-import { setSessionTokens } from '@/lib/session';
 
 type RegisterRole = 'customer' | 'vendor';
 
@@ -35,17 +34,15 @@ export function RegisterForm() {
 
     setSubmitting(true);
     try {
-      const { accessToken, refreshToken } = await apiFetch('/auth/register', {
+      const { phone: registeredPhone }: { phone: string } = await apiFetch('/auth/register', {
         method: 'POST',
         body: JSON.stringify(
           role === 'vendor'
-            ? { role, firstName, lastName, email, businessName, password }
+            ? { role, firstName, lastName, phone, email, businessName, password }
             : { role, firstName, lastName, phone, email, password },
         ),
       });
-      setSessionTokens(accessToken, refreshToken);
-      router.push(role === 'vendor' ? '/vendor/dashboard' : '/menu');
-      router.refresh();
+      router.push(`/verify-phone?phone=${encodeURIComponent(registeredPhone)}`);
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
         setError(
@@ -54,11 +51,7 @@ export function RegisterForm() {
             : 'That phone number is already registered.',
         );
       } else if (err instanceof ApiError && err.status === 400) {
-        setError(
-          role === 'vendor'
-            ? 'Enter a valid email address and Nigerian phone number.'
-            : 'Enter a valid Nigerian phone number and email address.',
-        );
+        setError('Enter a valid Nigerian phone number and email address.');
       } else {
         setError('Something went wrong. Please try again.');
       }
@@ -133,6 +126,21 @@ export function RegisterForm() {
             </p>
           )}
 
+          <div className="flex flex-col gap-2.5">
+            <label className="font-semibold text-[14.5px]">Phone number</label>
+            <input
+              required
+              type="tel"
+              placeholder="0801 234 5678"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className={inputClass}
+            />
+            <p className="text-xs text-[#8A8073]">
+              We&apos;ll text you a code to confirm this number before your account is active.
+            </p>
+          </div>
+
           {role === 'vendor' ? (
             <>
               <div className="flex flex-col gap-2.5">
@@ -161,29 +169,16 @@ export function RegisterForm() {
               </p>
             </>
           ) : (
-            <>
-              <div className="flex flex-col gap-2.5">
-                <label className="font-semibold text-[14.5px]">Phone number</label>
-                <input
-                  required
-                  type="tel"
-                  placeholder="0801 234 5678"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className={inputClass}
-                />
-              </div>
-              <div className="flex flex-col gap-2.5">
-                <label className="font-semibold text-[14.5px]">Email address</label>
-                <input
-                  required
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className={inputClass}
-                />
-              </div>
-            </>
+            <div className="flex flex-col gap-2.5">
+              <label className="font-semibold text-[14.5px]">Email address</label>
+              <input
+                required
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={inputClass}
+              />
+            </div>
           )}
 
           <div className="flex flex-col gap-2.5">
