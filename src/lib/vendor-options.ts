@@ -16,18 +16,13 @@ export const PREP_TIME_OPTIONS = [
   { value: 90, label: '60–90 min' },
 ];
 
-/** Vendor's own dispatch/logistics estimate — combined with prep time to bucket the
- * customer-facing "delivery time" (see DELIVERY_TIME_BUCKETS below). */
-export const DELIVERY_TIME_OPTIONS = [
-  { value: 60, label: 'Under 1 hour' },
-  { value: 180, label: '1–3 hours' },
-  { value: 360, label: '3–6 hours' },
-  { value: 720, label: '6–12 hours' },
-  { value: 1440, label: '12–24 hours' },
-];
+/** Fixed platform-wide dispatch/logistics estimate, added to a vendor's own prep time to
+ * bucket the customer-facing "delivery time" (see DELIVERY_TIME_BUCKETS below). Vendors used to
+ * set this themselves; it's now a flat constant so kitchens only manage prep time. */
+export const FIXED_DISPATCH_MINUTES = 90;
 
 /** Padding added on top of prep + dispatch time before bucketing, so the bucket we show
- * customers doesn't under-promise against the vendor's own (optimistic) estimates. */
+ * customers doesn't under-promise against the vendor's own (optimistic) prep estimate. */
 export const DELIVERY_TIME_BUFFER_MINUTES = 60;
 
 /** Customer-facing "delivery time" buckets — what's shown/filtered on the menu browser.
@@ -40,20 +35,13 @@ export const DELIVERY_TIME_BUCKETS = [
   { value: 'up-to-48h', label: 'Up to 48 hours', maxMinutes: 2880 },
 ];
 
-/** Total estimated minutes (prep + vendor's dispatch estimate + buffer), or null if either
- * half hasn't been set by the vendor yet. */
+/** Total estimated minutes (prep + fixed dispatch constant + buffer), or null if the vendor
+ * hasn't set a prep time yet. */
 export function getEstimatedDeliveryMinutes(vendor: {
   estimatedPrepMinutes?: number | null;
-  estimatedDeliveryMinutes?: number | null;
 }): number | null {
-  if (vendor.estimatedPrepMinutes == null || vendor.estimatedDeliveryMinutes == null) {
-    return null;
-  }
-  return (
-    vendor.estimatedPrepMinutes +
-    vendor.estimatedDeliveryMinutes +
-    DELIVERY_TIME_BUFFER_MINUTES
-  );
+  if (vendor.estimatedPrepMinutes == null) return null;
+  return vendor.estimatedPrepMinutes + FIXED_DISPATCH_MINUTES + DELIVERY_TIME_BUFFER_MINUTES;
 }
 
 /** Which customer-facing bucket a total estimated-minutes value falls into, or null if it
