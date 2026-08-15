@@ -5,6 +5,7 @@ const naira = (n: number) => `₦${n.toLocaleString('en-NG')}`;
 
 const STATUS_LABEL: Record<string, string> = {
   placed: 'Placed',
+  accepted: 'Accepted',
   ready_for_delivery: 'Ready for delivery',
   out_for_delivery: 'Out for delivery',
   delivered: 'Delivered',

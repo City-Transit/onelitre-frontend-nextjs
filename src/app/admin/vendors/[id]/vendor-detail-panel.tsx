@@ -44,6 +44,7 @@ const STATUS_CLASS: Record<string, string> = {
 
 const ORDER_STATUS_LABEL: Record<string, string> = {
   placed: 'Placed',
+  accepted: 'Accepted',
   ready_for_delivery: 'Ready for delivery',
   out_for_delivery: 'Out for delivery',
   delivered: 'Delivered',

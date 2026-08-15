@@ -12,6 +12,7 @@ const DISPUTE_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 const STATUS_LABEL: Record<string, string> = {
   placed: 'Placed',
+  accepted: 'Accepted',
   ready_for_delivery: 'Ready for delivery',
   out_for_delivery: 'Out for delivery',
   delivered: 'Delivered',
@@ -363,7 +364,11 @@ export function DispatchOrdersTable({ initialOrders }: { initialOrders: Order[] 
                   </div>
                 ) : (
                   <div className="text-right text-xs text-[#8A8073]">
-                    {order.status === 'placed' ? 'Awaiting kitchen' : '—'}
+                    {order.status === 'placed'
+                      ? 'Awaiting kitchen'
+                      : order.status === 'accepted'
+                        ? 'Preparing'
+                        : '—'}
                   </div>
                 )}
               </td>

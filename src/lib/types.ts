@@ -123,6 +123,7 @@ export interface Review {
 
 export type OrderStatus =
   | 'placed'
+  | 'accepted'
   | 'ready_for_delivery'
   | 'out_for_delivery'
   | 'delivered'
