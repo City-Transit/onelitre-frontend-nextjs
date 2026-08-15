@@ -3,13 +3,20 @@
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { DASHBOARD_BY_ROLE } from '@/lib/dashboard-routes';
+import { ActiveOrdersBadge } from './active-orders-badge';
 import { BasketButton } from './basket-button';
 import { ViewKitchensLink } from './view-kitchens-link';
 import type { User } from '@/lib/types';
 
 /** Collapses the header's nav links behind a toggle below the `sm` breakpoint — the plain flex
  * row (see site-header.tsx) wraps and overlaps the logo once there are more than ~3 links. */
-export function MobileNav({ user }: { user: User | null }) {
+export function MobileNav({
+  user,
+  activeOrderCount,
+}: {
+  user: User | null;
+  activeOrderCount: number;
+}) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -27,6 +34,7 @@ export function MobileNav({ user }: { user: User | null }) {
           <Suspense fallback={null}>
             <ViewKitchensLink />
           </Suspense>
+          <ActiveOrdersBadge count={activeOrderCount} />
           <BasketButton />
           {user ? (
             <Link

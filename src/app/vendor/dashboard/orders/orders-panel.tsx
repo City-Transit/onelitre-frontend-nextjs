@@ -3,9 +3,18 @@
 import { useState } from 'react';
 import { apiFetch, ApiError } from '@/lib/api';
 import { formatDate } from '@/lib/format';
-import type { VendorOrderGroup } from '@/lib/types';
+import type { OrderStatus, VendorOrderGroup } from '@/lib/types';
 
 const naira = (n: number) => `₦${n.toLocaleString('en-NG')}`;
+
+const STATUS_LABEL: Record<OrderStatus, string> = {
+  placed: 'Placed',
+  accepted: 'Accepted',
+  ready_for_delivery: 'Ready for delivery',
+  out_for_delivery: 'Out for delivery',
+  delivered: 'Delivered',
+  cancelled: 'Cancelled',
+};
 
 function deadlineLabel(acceptDeadlineAt: string): string {
   const msLeft = new Date(acceptDeadlineAt).getTime() - Date.now();
@@ -30,6 +39,10 @@ export function OrdersPanel({ initialGroups }: { initialGroups: VendorOrderGroup
           g.order.id === orderId
             ? {
                 ...g,
+                // Orders are single-vendor in practice (see cart-context.tsx), so this vendor's
+                // own items being all-accepted is exactly when the backend also flips the order
+                // to 'accepted' — matches OrdersService.acceptVendorItems.
+                order: { ...g.order, status: 'accepted' },
                 items: g.items.map((item) => ({
                   ...item,
                   vendorAcceptedAt: new Date().toISOString(),
@@ -149,7 +162,7 @@ export function OrdersPanel({ initialGroups }: { initialGroups: VendorOrderGroup
                 <td className="px-6 py-4 font-semibold whitespace-nowrap">{naira(total)}</td>
                 <td className="px-6 py-4">
                   <span className="rounded-full bg-paper-dim px-3 py-1 text-xs font-semibold">
-                    {order.status}
+                    {STATUS_LABEL[order.status]}
                   </span>
                   {!allAccepted && !anyRejected && (
                     <div className="mt-1 text-xs text-paprika-dim">

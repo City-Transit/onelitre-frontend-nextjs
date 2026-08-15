@@ -2,14 +2,24 @@ import Link from 'next/link';
 import { Suspense } from 'react';
 import { serverApiFetch } from '@/lib/server-api';
 import { DASHBOARD_BY_ROLE } from '@/lib/dashboard-routes';
+import { ActiveOrdersBadge } from './active-orders-badge';
 import { BasketButton } from './basket-button';
 import { MobileNav } from './mobile-nav';
 import { ViewKitchensLink } from './view-kitchens-link';
 import type { User } from '@/lib/types';
 
+async function getActiveOrderCount(user: User | null): Promise<number> {
+  if (user?.role !== 'customer') return 0;
+  const res = await serverApiFetch('/orders/me/active-count');
+  if (!res.ok) return 0;
+  const { count }: { count: number } = await res.json();
+  return count;
+}
+
 export async function SiteHeader() {
   const res = await serverApiFetch('/auth/me');
   const user: User | null = res.ok ? await res.json() : null;
+  const activeOrderCount = await getActiveOrderCount(user);
 
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-bg/90 backdrop-blur">
@@ -18,11 +28,12 @@ export async function SiteHeader() {
           <span className="inline-block h-[9px] w-[9px] rounded-full bg-paprika shadow-[0_0_0_3px_rgba(217,118,43,0.25)]" />
           Onelitre.ng
         </Link>
-        <MobileNav user={user} />
+        <MobileNav user={user} activeOrderCount={activeOrderCount} />
         <nav className="hidden items-center gap-5 font-mono text-[13px] sm:flex">
           <Suspense fallback={null}>
             <ViewKitchensLink />
           </Suspense>
+          <ActiveOrdersBadge count={activeOrderCount} />
           <BasketButton />
           {user ? (
             <Link
