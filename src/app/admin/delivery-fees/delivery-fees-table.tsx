@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, ApiError } from '@/lib/api';
 import type { DeliveryFee } from '@/lib/types';
 
 const naira = (n: number) => `₦${n.toLocaleString('en-NG')}`;
@@ -12,6 +12,7 @@ export function DeliveryFeesTable({ initialFees }: { initialFees: DeliveryFee[] 
     Object.fromEntries(initialFees.map((f) => [f.id, String(f.feeNaira)])),
   );
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [errorById, setErrorById] = useState<Record<string, string>>({});
 
   async function save(id: string) {
     const feeNaira = Number(drafts[id]);
@@ -23,6 +24,28 @@ export function DeliveryFeesTable({ initialFees }: { initialFees: DeliveryFee[] 
     });
     setFees((prev) => prev.map((f) => (f.id === id ? updated : f)));
     setBusyId(null);
+  }
+
+  async function toggleLaunched(fee: DeliveryFee) {
+    setBusyId(fee.id);
+    setErrorById((prev) => ({ ...prev, [fee.id]: '' }));
+    try {
+      const updated: DeliveryFee = await apiFetch(`/admin/delivery-fees/${fee.id}/launch`, {
+        method: 'PATCH',
+        body: JSON.stringify({ isLaunched: !fee.isLaunched }),
+      });
+      setFees((prev) => prev.map((f) => (f.id === fee.id ? updated : f)));
+    } catch (err) {
+      setErrorById((prev) => ({
+        ...prev,
+        [fee.id]:
+          err instanceof ApiError && err.status === 403
+            ? 'Only super admins can change this.'
+            : 'Something went wrong.',
+      }));
+    } finally {
+      setBusyId(null);
+    }
   }
 
   if (fees.length === 0) {
@@ -40,6 +63,7 @@ export function DeliveryFeesTable({ initialFees }: { initialFees: DeliveryFee[] 
           <tr>
             <th className="px-6 py-4">Area</th>
             <th className="px-6 py-4">Fee</th>
+            <th className="px-6 py-4">Launched</th>
             <th className="px-6 py-4 text-right">Actions</th>
           </tr>
         </thead>
@@ -64,6 +88,22 @@ export function DeliveryFeesTable({ initialFees }: { initialFees: DeliveryFee[] 
                     />
                     <span className="text-xs text-[#8A8073]">({naira(fee.feeNaira)} current)</span>
                   </div>
+                </td>
+                <td className="px-6 py-4">
+                  <button
+                    onClick={() => toggleLaunched(fee)}
+                    disabled={busyId === fee.id}
+                    className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors disabled:opacity-60 ${
+                      fee.isLaunched
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-paper-dim text-[#5B6B63]'
+                    }`}
+                  >
+                    {fee.isLaunched ? 'Live ✓' : 'Not live'}
+                  </button>
+                  {errorById[fee.id] && (
+                    <p className="mt-1 text-xs text-red-700">{errorById[fee.id]}</p>
+                  )}
                 </td>
                 <td className="px-6 py-4 text-right">
                   <button
