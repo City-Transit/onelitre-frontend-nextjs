@@ -183,6 +183,7 @@ export interface DeliveryFee {
   id: string;
   area: string;
   feeNaira: number;
+  isLaunched: boolean;
   updatedAt: string;
 }
 

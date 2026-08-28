@@ -2,6 +2,8 @@ import { SiteHeader } from '@/components/site-header';
 import { FaqAccordion } from '@/components/faq-accordion';
 import { SavingsCalculator } from '@/components/savings-calculator';
 import { HeroCityPicker } from './hero-city-picker';
+import { API_BASE_URL } from '@/lib/api-base-url';
+import type { DeliveryFee } from '@/lib/types';
 
 const TAGS = [
   { name: 'Ogbono Stew', portions: '4 PORTIONS', price: '₦6,500', className: 'top-0 left-[10%] rotate-[-6deg] z-30' },
@@ -30,7 +32,16 @@ const STEPS = [
   },
 ];
 
-export default function Home() {
+async function getLaunchedAreas(): Promise<string[]> {
+  const res = await fetch(`${API_BASE_URL}/delivery-fees`, { cache: 'no-store' });
+  if (!res.ok) return [];
+  const fees: DeliveryFee[] = await res.json();
+  return fees.filter((f) => f.isLaunched).map((f) => f.area);
+}
+
+export default async function Home() {
+  const launchedAreas = await getLaunchedAreas();
+
   return (
     <>
       <SiteHeader />
@@ -51,7 +62,7 @@ export default function Home() {
               Bulk, freezer-ready meals from vetted kitchens near you — home-cooked quality
               without the time or skill it takes to make it yourself.
             </p>
-            <HeroCityPicker />
+            <HeroCityPicker launchedAreas={launchedAreas} />
           </div>
 
           <div className="relative hidden h-[460px] md:block" aria-hidden="true">

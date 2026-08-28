@@ -31,6 +31,8 @@ export function CheckoutForm({ vendors, user }: { vendors: Vendor[]; user: User 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [feesByArea, setFeesByArea] = useState<Map<string, number>>(new Map());
+  const [launchedAreas, setLaunchedAreas] = useState<Set<string>>(new Set());
+  const [feesLoaded, setFeesLoaded] = useState(false);
   const benchmark = useSavingsBenchmark();
 
   useEffect(() => {
@@ -41,8 +43,10 @@ export function CheckoutForm({ vendors, user }: { vendors: Vendor[]; user: User 
     apiFetch('/delivery-fees')
       .then((fees: DeliveryFee[]) => {
         setFeesByArea(new Map(fees.map((f) => [f.area, f.feeNaira])));
+        setLaunchedAreas(new Set(fees.filter((f) => f.isLaunched).map((f) => f.area)));
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setFeesLoaded(true));
   }, []);
 
   const itemsById = new Map(vendors.flatMap((v) => v.meals.map((item) => [item.id, item] as const)));
@@ -56,6 +60,7 @@ export function CheckoutForm({ vendors, user }: { vendors: Vendor[]; user: User 
     .filter((line): line is NonNullable<typeof line> => line !== null);
 
   const subtotal = lines.reduce((sum, line) => sum + line.item.price * line.quantity, 0);
+  const areaNotLaunched = feesLoaded && area !== '' && !launchedAreas.has(area);
   const deliveryFee = feesByArea.get(area) ?? 0;
   const serviceFee = Math.round(subtotal * SERVICE_FEE_RATE);
   const grandTotal = subtotal + deliveryFee + serviceFee;
@@ -115,9 +120,18 @@ export function CheckoutForm({ vendors, user }: { vendors: Vendor[]; user: User 
               <span>{naira(subtotal)}</span>
             </div>
             <div className="flex justify-between py-1 text-sm">
-              <span>Delivery fee{area ? '' : ' (select an area)'}</span>
+              <span>
+                Delivery fee
+                {!area ? ' (select an area)' : areaNotLaunched ? ' (not available)' : ''}
+              </span>
               <span>{naira(deliveryFee)}</span>
             </div>
+            {areaNotLaunched && (
+              <p className="text-xs text-red-700">
+                We haven&apos;t launched delivery in {area} yet — pick a different area to
+                continue.
+              </p>
+            )}
             <div className="flex justify-between py-1 text-sm">
               <span>Service fee (2%)</span>
               <span>{naira(serviceFee)}</span>
@@ -166,8 +180,8 @@ export function CheckoutForm({ vendors, user }: { vendors: Vendor[]; user: User 
                     Select an area
                   </option>
                   {LAGOS_AREAS.map((a) => (
-                    <option key={a} value={a}>
-                      {a}
+                    <option key={a} value={a} disabled={feesLoaded && !launchedAreas.has(a)}>
+                      {feesLoaded && !launchedAreas.has(a) ? `${a} — not yet available` : a}
                     </option>
                   ))}
                 </select>
@@ -225,7 +239,7 @@ export function CheckoutForm({ vendors, user }: { vendors: Vendor[]; user: User 
             {error && <p className="text-sm text-red-700">{error}</p>}
             <button
               type="submit"
-              disabled={submitting}
+              disabled={submitting || areaNotLaunched}
               className="mt-2 rounded-full bg-paprika-dim px-5 py-3 font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-paprika disabled:translate-y-0 disabled:opacity-65"
             >
               {submitting ? 'Redirecting to payment…' : 'Place order & pay'}

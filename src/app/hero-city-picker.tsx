@@ -11,16 +11,26 @@ const selectClass =
  * leads with "are we in your area?" rather than a generic sign-up button. Picking a local
  * government takes the visitor straight to the kitchen list (kitchens near that area sorted
  * first — see menu-browser.tsx), no extra click needed. Log in/sign up stay reachable from the
- * site header regardless. */
-export function HeroCityPicker() {
+ * site header regardless.
+ *
+ * `launchedAreas` (from the /delivery-fees isLaunched flag, super-admin-set — see
+ * delivery-fees-table.tsx) gates *delivery*, not kitchen search: every LGA still shows in the
+ * dropdown so a visitor can see we're Lagos-based, but picking one we can't deliver to yet stops
+ * here with a "not live there yet" message instead of continuing to the kitchen list. */
+export function HeroCityPicker({ launchedAreas }: { launchedAreas: string[] }) {
   const router = useRouter();
   const [city, setCity] = useState(LIVE_CITY);
   const [area, setArea] = useState('');
+  const [notLaunched, setNotLaunched] = useState(false);
 
   function handleAreaChange(value: string) {
     setArea(value);
-    if (value) {
+    if (!value) return;
+    if (launchedAreas.includes(value)) {
+      setNotLaunched(false);
       router.push(`/menu?area=${encodeURIComponent(value)}`);
+    } else {
+      setNotLaunched(true);
     }
   }
 
@@ -55,9 +65,19 @@ export function HeroCityPicker() {
         </select>
       </div>
 
-      <p className="mt-4 text-sm text-muted">
-        Pick your local government above to see kitchens near you.
-      </p>
+      {notLaunched ? (
+        <p className="mt-4 text-sm text-paprika">
+          We haven&apos;t launched delivery in {area} yet — check back soon, or{' '}
+          <a href="/menu" className="underline">
+            browse kitchens
+          </a>{' '}
+          anyway.
+        </p>
+      ) : (
+        <p className="mt-4 text-sm text-muted">
+          Pick your local government above to see kitchens near you.
+        </p>
+      )}
     </div>
   );
 }
