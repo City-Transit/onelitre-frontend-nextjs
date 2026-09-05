@@ -3,19 +3,14 @@
 import Link from 'next/link';
 import { useCart } from '@/app/menu/cart-context';
 import { useCartTotals } from '@/lib/use-cart-totals';
-import { useSavingsBenchmark } from '@/lib/use-savings-benchmark';
-import { computeSavings } from '@/lib/savings';
 
 const naira = (n: number) => `₦${n.toLocaleString('en-NG')}`;
 
 export function CartDrawer() {
   const { vendorId, count, isDrawerOpen, closeDrawer, setQty } = useCart();
   const { lines, total, mealsCovered, loading } = useCartTotals();
-  const benchmark = useSavingsBenchmark();
 
   if (!isDrawerOpen) return null;
-
-  const savingsResult = benchmark ? computeSavings(mealsCovered, total, benchmark) : null;
 
   return (
     <div className="fixed inset-0 z-[60] flex justify-end">
@@ -89,10 +84,9 @@ export function CartDrawer() {
 
         {count > 0 && (
           <div className="border-t border-line px-6 py-5">
-            {savingsResult && savingsResult.savings > 0 && (
+            {mealsCovered > 0 && (
               <div className="mb-3 font-mono text-xs text-frost">
-                ≈ {mealsCovered} {mealsCovered === 1 ? 'meal' : 'meals'} · save{' '}
-                {naira(savingsResult.savings)} vs. delivery apps
+                ≈ {mealsCovered} {mealsCovered === 1 ? 'meal' : 'meals'}
               </div>
             )}
             <div className="mb-4 flex justify-between font-serif text-lg text-paper">

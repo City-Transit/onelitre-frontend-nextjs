@@ -4,8 +4,6 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { apiFetch } from '@/lib/api';
 import { useCart } from '@/app/menu/cart-context';
-import { useSavingsBenchmark } from '@/lib/use-savings-benchmark';
-import { computeSavings } from '@/lib/savings';
 import type { DeliveryFee, Vendor } from '@/lib/types';
 
 const naira = (n: number) => `₦${Math.round(n).toLocaleString('en-NG')}`;
@@ -14,12 +12,11 @@ const naira = (n: number) => `₦${Math.round(n).toLocaleString('en-NG')}`;
 const SERVICE_FEE_RATE = 0.02;
 
 /** Desktop-only persistent basket, live as items are added — mirrors the checkout summary
- * (fees + savings message) without waiting for the customer to open the drawer or go to
- * checkout. No delivery area is known yet here, so the delivery fee shown is the lowest
- * currently configured across all areas (in practice a single flat rate today). */
+ * (fees) without waiting for the customer to open the drawer or go to checkout. No delivery
+ * area is known yet here, so the delivery fee shown is the lowest currently configured across
+ * all areas (in practice a single flat rate today). */
 export function VendorBasketPanel({ vendor }: { vendor: Vendor }) {
   const { cart, vendorId, setQty } = useCart();
-  const benchmark = useSavingsBenchmark();
   const [minDeliveryFee, setMinDeliveryFee] = useState(0);
 
   useEffect(() => {
@@ -57,7 +54,6 @@ export function VendorBasketPanel({ vendor }: { vendor: Vendor }) {
   const serviceFee = Math.round(subtotal * SERVICE_FEE_RATE);
   const total = subtotal + minDeliveryFee + serviceFee;
   const mealsCovered = lines.reduce((sum, line) => sum + line.item.servings * line.quantity, 0);
-  const savingsResult = benchmark ? computeSavings(mealsCovered, total, benchmark) : null;
 
   return (
     <aside className="hidden lg:block">
@@ -115,12 +111,9 @@ export function VendorBasketPanel({ vendor }: { vendor: Vendor }) {
           </div>
         </div>
 
-        {savingsResult && savingsResult.savings > 0 && (
+        {mealsCovered > 0 && (
           <div className="mt-3 rounded-[10px] bg-paprika/10 px-3 py-2.5 text-xs text-paprika-dim">
-            This order covers {mealsCovered} {mealsCovered === 1 ? 'meal' : 'meals'} — ordered
-            the same way via typical delivery apps, that&apos;d run ~
-            {naira(savingsResult.restaurantEquivalentCost)}. You&apos;re saving{' '}
-            {naira(savingsResult.savings)} ({Math.round(savingsResult.pctSaved * 100)}%).
+            This order covers {mealsCovered} {mealsCovered === 1 ? 'meal' : 'meals'}.
           </div>
         )}
 
