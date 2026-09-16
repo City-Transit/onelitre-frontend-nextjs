@@ -5,6 +5,7 @@ import { DASHBOARD_BY_ROLE } from '@/lib/dashboard-routes';
 import { ActiveOrdersBadge } from './active-orders-badge';
 import { BasketButton } from './basket-button';
 import { MobileNav } from './mobile-nav';
+import { NotificationBell } from './notification-bell';
 import { ViewKitchensLink } from './view-kitchens-link';
 import type { User } from '@/lib/types';
 
@@ -35,6 +36,7 @@ export async function SiteHeader() {
           </Suspense>
           <ActiveOrdersBadge count={activeOrderCount} />
           <BasketButton />
+          <NotificationBell user={user} />
           {user ? (
             <Link
               href={DASHBOARD_BY_ROLE[user.role]}

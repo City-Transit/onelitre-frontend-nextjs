@@ -22,6 +22,18 @@ export interface User {
   updatedAt: string;
 }
 
+export type NotificationType = 'vendor_order_received' | 'order_ready' | 'order_shipped';
+
+export interface Notification {
+  id: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  orderId?: string | null;
+  read: boolean;
+  createdAt: string;
+}
+
 export type MealApprovalStatus = 'pending' | 'approved' | 'rejected';
 
 export interface MealSize {

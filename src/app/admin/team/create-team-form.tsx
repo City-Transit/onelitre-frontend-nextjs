@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiFetch, ApiError } from '@/lib/api';
+import { PasswordInput } from '@/components/password-input';
 import type { Role } from '@/lib/types';
 
 const CREATABLE_ROLES: Partial<Record<Role, Role[]>> = {
@@ -115,12 +116,12 @@ export function CreateTeamForm({ viewerRole }: { viewerRole: Role }) {
       </div>
       <div>
         <label className="text-sm font-semibold">Password</label>
-        <input
+        <PasswordInput
           required
-          type="password"
           minLength={8}
+          autoComplete="new-password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={setPassword}
           className={`${inputClass} mt-1`}
         />
       </div>

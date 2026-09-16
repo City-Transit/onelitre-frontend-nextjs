@@ -9,7 +9,13 @@ import type { User } from '@/lib/types';
 const inputClass =
   'mt-1 w-full rounded-[10px] border border-[rgba(18,33,29,0.14)] bg-paper-dim px-4 py-[15px] text-[15px] text-ink focus:border-paprika focus:bg-white focus:shadow-[0_0_0_3px_rgba(217,118,43,0.14)] focus:outline-none';
 
-export default function EditProfileForm({ user }: { user: User }) {
+export default function EditProfileForm({
+  user,
+  launchedAreas,
+}: {
+  user: User;
+  launchedAreas: string[];
+}) {
   const router = useRouter();
   const [firstName, setFirstName] = useState(user.firstName);
   const [lastName, setLastName] = useState(user.lastName);
@@ -75,13 +81,20 @@ export default function EditProfileForm({ user }: { user: User }) {
           <option value="">Select an area</option>
           {LAGOS_AREAS.map((a) => (
             <option key={a} value={a}>
-              {a}
+              {launchedAreas.includes(a) ? a : `${a} (coming soon)`}
             </option>
           ))}
         </select>
-        <p className="mt-1.5 text-xs text-[#8A8073]">
-          Saved here so checkout can pre-fill your delivery address and area automatically.
-        </p>
+        {area && !launchedAreas.includes(area) ? (
+          <p className="mt-1.5 text-xs text-paprika">
+            We haven&apos;t launched delivery in {area} yet — you can still save this, and we
+            &apos;ll have kitchens delivering there soon.
+          </p>
+        ) : (
+          <p className="mt-1.5 text-xs text-[#8A8073]">
+            Saved here so checkout can pre-fill your delivery address and area automatically.
+          </p>
+        )}
       </div>
       <div className="flex items-center gap-3">
         <button
