@@ -26,6 +26,7 @@ export function MealsPanel({ initialMeals }: { initialMeals: MealSize[] }) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [file, setFile] = useState<File | null>(null);
+  const [fileInputKey, setFileInputKey] = useState(0);
   const [photoRequested, setPhotoRequested] = useState(false);
   const [litres, setLitres] = useState('');
   const [price, setPrice] = useState('');
@@ -71,6 +72,7 @@ export function MealsPanel({ initialMeals }: { initialMeals: MealSize[] }) {
       setName('');
       setDescription('');
       setFile(null);
+      setFileInputKey((k) => k + 1);
       setPhotoRequested(false);
       setLitres('');
       setPrice('');
@@ -118,11 +120,12 @@ export function MealsPanel({ initialMeals }: { initialMeals: MealSize[] }) {
           <div className="w-full">
             <label className="text-sm font-semibold">Photo (required to go live)</label>
             <input
+              key={fileInputKey}
               type="file"
               accept="image/*"
               disabled={photoRequested}
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-              className="mt-1 w-full text-sm disabled:opacity-50"
+              className="mt-1 w-full text-sm text-[#5B6B63] file:mr-3 file:rounded-full file:border-0 file:bg-paprika-dim file:px-3.5 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:file:bg-paprika disabled:opacity-50 disabled:file:bg-[#5B6B63]"
             />
             <label className="mt-1.5 flex items-center gap-1.5 text-xs text-[#5B6B63]">
               <input

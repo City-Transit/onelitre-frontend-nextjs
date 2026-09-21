@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { apiFetch, ApiError } from '@/lib/api';
 import { setSessionTokens } from '@/lib/session';
+import { PasswordInput } from '@/components/password-input';
 import type { User } from '@/lib/types';
 
 const inputClass =
@@ -140,12 +141,12 @@ export function ForgotPasswordForm() {
               </div>
               <div className="flex flex-col gap-2.5">
                 <label className="font-semibold text-[14.5px]">New password</label>
-                <input
+                <PasswordInput
                   required
-                  type="password"
                   minLength={8}
+                  autoComplete="new-password"
                   value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
+                  onChange={setNewPassword}
                   className={inputClass}
                 />
               </div>
@@ -155,10 +156,18 @@ export function ForgotPasswordForm() {
                   required
                   type="password"
                   minLength={8}
+                  autoComplete="new-password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className={inputClass}
                 />
+                {confirmPassword && (
+                  <div
+                    className={`text-xs ${confirmPassword === newPassword ? 'text-green-700' : 'text-red-700'}`}
+                  >
+                    {confirmPassword === newPassword ? 'Passwords match.' : 'Passwords do not match.'}
+                  </div>
+                )}
               </div>
               {error && <p className="text-sm text-red-700">{error}</p>}
               <button

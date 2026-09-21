@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { apiFetch, ApiError } from '@/lib/api';
 import { setSessionTokens } from '@/lib/session';
+import { PasswordInput } from '@/components/password-input';
 import type { User } from '@/lib/types';
 
 const DASHBOARD_BY_ROLE: Record<User['role'], string> = {
@@ -86,11 +87,11 @@ export function LoginForm() {
                 </Link>
               )}
             </div>
-            <input
+            <PasswordInput
               required
-              type="password"
+              autoComplete="current-password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={setPassword}
               className="w-full rounded-[10px] border border-[rgba(18,33,29,0.14)] bg-paper-dim px-4 py-[15px] text-[15px] text-ink focus:border-paprika focus:bg-white focus:shadow-[0_0_0_3px_rgba(217,118,43,0.14)] focus:outline-none"
             />
           </div>

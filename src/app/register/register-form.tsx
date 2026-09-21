@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { apiFetch, ApiError } from '@/lib/api';
+import { PasswordInput } from '@/components/password-input';
 
 type RegisterRole = 'customer' | 'vendor';
 
@@ -183,12 +184,12 @@ export function RegisterForm() {
 
           <div className="flex flex-col gap-2.5">
             <label className="font-semibold text-[14.5px]">Password</label>
-            <input
+            <PasswordInput
               required
-              type="password"
               minLength={8}
+              autoComplete="new-password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={setPassword}
               className={inputClass}
             />
             <div className="text-xs text-[#8A8073]">Minimum 8 characters.</div>
@@ -199,10 +200,16 @@ export function RegisterForm() {
               required
               type="password"
               minLength={8}
+              autoComplete="new-password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className={inputClass}
             />
+            {confirmPassword && (
+              <div className={`text-xs ${confirmPassword === password ? 'text-green-700' : 'text-red-700'}`}>
+                {confirmPassword === password ? 'Passwords match.' : 'Passwords do not match.'}
+              </div>
+            )}
           </div>
           {error && <p className="text-sm text-red-700">{error}</p>}
           <button

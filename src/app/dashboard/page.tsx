@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { serverApiFetch } from '@/lib/server-api';
-import type { Order, User } from '@/lib/types';
+import type { DeliveryFee, Order, User } from '@/lib/types';
 import LogoutButton from './logout-button';
 import EditProfileForm from './edit-profile-form';
 import { MyOrders } from './my-orders';
@@ -16,6 +16,10 @@ export default async function DashboardPage() {
   const ordersRes = await serverApiFetch('/orders/me');
   const orders: Order[] = ordersRes.ok ? await ordersRes.json() : [];
 
+  const feesRes = await serverApiFetch('/delivery-fees');
+  const fees: DeliveryFee[] = feesRes.ok ? await feesRes.json() : [];
+  const launchedAreas = fees.filter((f) => f.isLaunched).map((f) => f.area);
+
   return (
     <>
       <div className="mx-auto w-full max-w-2xl flex-1 px-6 py-16">
@@ -29,7 +33,7 @@ export default async function DashboardPage() {
           <LogoutButton />
         </div>
         <div className="mt-8 rounded-[20px] bg-paper p-8 text-ink shadow-[0_24px_60px_rgba(18,33,29,0.35)]">
-          <EditProfileForm user={user} />
+          <EditProfileForm user={user} launchedAreas={launchedAreas} />
         </div>
         <SubscriptionPanel />
         <div className="mt-8">

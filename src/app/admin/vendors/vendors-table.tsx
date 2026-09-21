@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, ApiError } from '@/lib/api';
 import type { Vendor } from '@/lib/types';
 
 const STATUS_LABEL: Record<string, string> = {
@@ -22,15 +22,26 @@ export function VendorsTable({
 }) {
   const [vendors, setVendors] = useState(initialVendors);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [errorById, setErrorById] = useState<Record<string, string>>({});
 
   async function setStatus(vendorId: string, status: 'approved' | 'suspended') {
     setBusyId(vendorId);
-    await apiFetch(`/admin/vendors/${vendorId}/status`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status }),
-    });
-    setVendors((prev) => prev.map((v) => (v.id === vendorId ? { ...v, status } : v)));
-    setBusyId(null);
+    setErrorById((prev) => ({ ...prev, [vendorId]: '' }));
+    try {
+      await apiFetch(`/admin/vendors/${vendorId}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+      });
+      setVendors((prev) => prev.map((v) => (v.id === vendorId ? { ...v, status } : v)));
+    } catch (err) {
+      setErrorById((prev) => ({
+        ...prev,
+        [vendorId]:
+          err instanceof ApiError ? err.message : 'Something went wrong updating this kitchen.',
+      }));
+    } finally {
+      setBusyId(null);
+    }
   }
 
   if (vendors.length === 0) {
@@ -134,6 +145,9 @@ export function VendorsTable({
                       Review
                     </Link>
                   </div>
+                )}
+                {errorById[vendor.id] && (
+                  <p className="mt-2 text-right text-xs text-red-700">{errorById[vendor.id]}</p>
                 )}
               </td>
             </tr>

@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation';
 import { apiFetch, ApiError } from '@/lib/api';
 import { useCart } from '../menu/cart-context';
 import { COMING_SOON_CITIES, LAGOS_AREAS, LIVE_CITY } from '@/lib/locations';
-import { useSavingsBenchmark } from '@/lib/use-savings-benchmark';
-import { computeSavings } from '@/lib/savings';
+import { AddressAutocompleteInput } from '@/components/address-autocomplete-input';
 import type { DeliveryFee, User, Vendor } from '@/lib/types';
 
 const naira = (n: number) => `₦${n.toLocaleString('en-NG')}`;
@@ -33,7 +32,6 @@ export function CheckoutForm({ vendors, user }: { vendors: Vendor[]; user: User 
   const [feesByArea, setFeesByArea] = useState<Map<string, number>>(new Map());
   const [launchedAreas, setLaunchedAreas] = useState<Set<string>>(new Set());
   const [feesLoaded, setFeesLoaded] = useState(false);
-  const benchmark = useSavingsBenchmark();
 
   useEffect(() => {
     if (count === 0) router.replace('/menu');
@@ -65,7 +63,6 @@ export function CheckoutForm({ vendors, user }: { vendors: Vendor[]; user: User 
   const serviceFee = Math.round(subtotal * SERVICE_FEE_RATE);
   const grandTotal = subtotal + deliveryFee + serviceFee;
   const mealsCovered = lines.reduce((sum, line) => sum + line.item.servings * line.quantity, 0);
-  const savingsResult = benchmark ? computeSavings(mealsCovered, grandTotal, benchmark) : null;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -140,12 +137,9 @@ export function CheckoutForm({ vendors, user }: { vendors: Vendor[]; user: User 
               <span>Total</span>
               <span>{naira(grandTotal)}</span>
             </div>
-            {savingsResult && savingsResult.savings > 0 && (
+            {mealsCovered > 0 && (
               <div className="mt-3 rounded-[10px] bg-paprika/10 px-3 py-2.5 text-xs text-paprika-dim">
-                This order covers {mealsCovered} {mealsCovered === 1 ? 'meal' : 'meals'} — ordered
-                the same way via typical delivery apps, that&apos;d run ~
-                {naira(savingsResult.restaurantEquivalentCost)}. You&apos;re saving{' '}
-                {naira(savingsResult.savings)} ({Math.round(savingsResult.pctSaved * 100)}%).
+                This order covers {mealsCovered} {mealsCovered === 1 ? 'meal' : 'meals'}.
               </div>
             )}
           </div>
@@ -189,12 +183,11 @@ export function CheckoutForm({ vendors, user }: { vendors: Vendor[]; user: User 
             </div>
             <div>
               <label className="text-sm font-semibold">Street address</label>
-              <textarea
+              <AddressAutocompleteInput
                 required
-                rows={2}
                 placeholder="12 Admiralty Way, off Ligali Ayorinde"
                 value={deliveryAddress}
-                onChange={(e) => setDeliveryAddress(e.target.value)}
+                onChange={setDeliveryAddress}
                 className={`${inputClass} mt-1`}
               />
             </div>

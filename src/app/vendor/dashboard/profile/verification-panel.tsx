@@ -38,6 +38,20 @@ const STATUS_CLASS: Record<string, string> = {
   rejected: 'bg-red-100 text-red-700',
 };
 
+/** Doc.reviewerNote for `nin`/`cac` is built from the raw Dojah lookup result (see
+ * VendorsService.upsertDocument on the backend) — useful detail for an admin reviewing the
+ * account, but not something to surface verbatim to the vendor. Status alone drives what they
+ * see here instead. */
+function verificationMessage(status: string): string | null {
+  if (status === 'rejected') {
+    return "We couldn't verify this — double check the number and try again, or contact support if it keeps failing.";
+  }
+  if (status === 'pending') {
+    return "We're reviewing this — you'll be notified once it's confirmed.";
+  }
+  return null;
+}
+
 export function VerificationPanel({
   vendor,
   initialDocuments,
@@ -239,9 +253,9 @@ export function VerificationPanel({
                       >
                         {STATUS_LABEL[doc.status]}
                       </span>
-                      {doc.reviewerNote && (
+                      {verificationMessage(doc.status) && (
                         <span className={doc.status === 'rejected' ? 'text-red-700' : 'text-[#5B6B63]'}>
-                          {doc.reviewerNote}
+                          {verificationMessage(doc.status)}
                         </span>
                       )}
                     </div>
