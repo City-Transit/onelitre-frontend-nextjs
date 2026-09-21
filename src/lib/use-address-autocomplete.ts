@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { importLibrary, setOptions } from '@googlemaps/js-api-loader';
 
-const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '';
+const API_KEY = process.env.GOOGLE_MAPS_API_KEY ?? '';
 const DEFAULT_REGION_CODES = ['ng'];
 const DEBOUNCE_MS = 250;
 
@@ -35,7 +35,7 @@ export interface AddressSuggestion {
  * per search session, created on first keystroke and cleared once a suggestion is resolved to a
  * place — reusing a token across sessions, or omitting one, causes every keystroke to bill
  * individually instead of as one grouped session. No-ops entirely if
- * NEXT_PUBLIC_GOOGLE_MAPS_API_KEY isn't set, so the input this backs still works as a plain
+ * GOOGLE_MAPS_API_KEY isn't set, so the input this backs still works as a plain
  * text field without it. */
 export function useAddressAutocomplete(regionCodes: string[] = DEFAULT_REGION_CODES) {
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
