@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { apiFetch, ApiError } from '@/lib/api';
 import { useCart } from '../menu/cart-context';
 import { COMING_SOON_CITIES, LAGOS_AREAS, LIVE_CITY } from '@/lib/locations';
+import { AddressAutocompleteInput } from '@/components/address-autocomplete-input';
 import type { DeliveryFee, User, Vendor } from '@/lib/types';
 
 const naira = (n: number) => `₦${n.toLocaleString('en-NG')}`;
@@ -182,12 +183,11 @@ export function CheckoutForm({ vendors, user }: { vendors: Vendor[]; user: User 
             </div>
             <div>
               <label className="text-sm font-semibold">Street address</label>
-              <textarea
+              <AddressAutocompleteInput
                 required
-                rows={2}
                 placeholder="12 Admiralty Way, off Ligali Ayorinde"
                 value={deliveryAddress}
-                onChange={(e) => setDeliveryAddress(e.target.value)}
+                onChange={setDeliveryAddress}
                 className={`${inputClass} mt-1`}
               />
             </div>

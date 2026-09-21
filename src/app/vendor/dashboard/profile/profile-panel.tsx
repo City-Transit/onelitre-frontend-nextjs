@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/api';
 import { COMING_SOON_CITIES, LAGOS_AREAS, LIVE_CITY } from '@/lib/locations';
 import { CUISINE_OPTIONS, PREP_TIME_OPTIONS } from '@/lib/vendor-options';
+import { AddressAutocompleteInput } from '@/components/address-autocomplete-input';
 import type { Vendor } from '@/lib/types';
 
 const inputClass =
@@ -78,7 +79,12 @@ export function ProfilePanel({ vendor }: { vendor: Vendor }) {
         </div>
         <div className="flex flex-col gap-2">
           <label className="text-sm font-semibold">Area</label>
-          <select value={area} onChange={(e) => setArea(e.target.value)} className={inputClass}>
+          <select
+            required
+            value={area}
+            onChange={(e) => setArea(e.target.value)}
+            className={inputClass}
+          >
             <option value="" disabled>
               Select an area
             </option>
@@ -93,10 +99,11 @@ export function ProfilePanel({ vendor }: { vendor: Vendor }) {
 
       <div className="flex flex-col gap-2">
         <label className="text-sm font-semibold">Kitchen address</label>
-        <input
+        <AddressAutocompleteInput
+          required
           placeholder="12 Admiralty Way"
           value={address}
-          onChange={(e) => setAddress(e.target.value)}
+          onChange={setAddress}
           className={inputClass}
         />
       </div>
@@ -104,6 +111,7 @@ export function ProfilePanel({ vendor }: { vendor: Vendor }) {
       <div className="flex flex-col gap-2">
         <label className="text-sm font-semibold">Business phone</label>
         <input
+          required
           type="tel"
           placeholder="0801 234 5678"
           value={contactPhone}
