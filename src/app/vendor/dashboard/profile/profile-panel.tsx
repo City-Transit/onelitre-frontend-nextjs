@@ -147,17 +147,24 @@ export function ProfilePanel({ vendor }: { vendor: Vendor }) {
       <div className="flex flex-col gap-2">
         <label className="text-sm font-semibold">Typical prep time</label>
         <select
+          required
           value={estimatedPrepMinutes}
           onChange={(e) => setEstimatedPrepMinutes(e.target.value)}
           className={inputClass}
         >
-          <option value="">Select prep time</option>
+          <option value="" disabled>
+            Select prep time
+          </option>
           {PREP_TIME_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>
               {o.label}
             </option>
           ))}
         </select>
+        <p className="mt-1 text-xs text-[#8A8073]">
+          Drives the delivery-time estimate customers see — required before your kitchen can be
+          fully approved.
+        </p>
       </div>
 
       {error && <p className="text-sm text-red-700">{error}</p>}

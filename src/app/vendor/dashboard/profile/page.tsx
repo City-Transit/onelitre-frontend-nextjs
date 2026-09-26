@@ -51,9 +51,9 @@ export default async function VendorProfilePage() {
       </div>
 
       <div>
-        <h2 className="mb-4 text-xl text-paper">Contract &amp; verification</h2>
+        <h2 className="mb-4 text-xl text-paper">Verification</h2>
         <div className="rounded-[20px] bg-paper p-8 text-ink shadow-[0_24px_60px_rgba(18,33,29,0.35)]">
-          <VerificationPanel vendor={vendor} initialDocuments={documents} />
+          <VerificationPanel initialDocuments={documents} />
           <p className="mt-4 text-sm font-semibold">
             {vendor.customAdvancePct != null &&
             vendor.customRemainderPct != null &&
