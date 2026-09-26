@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/api';
 import { LAGOS_AREAS } from '@/lib/locations';
+import { AddressAutocompleteInput } from '@/components/address-autocomplete-input';
 import type { User } from '@/lib/types';
 
 const inputClass =
@@ -69,9 +70,9 @@ export default function EditProfileForm({
       </div>
       <div>
         <label className="text-[14.5px] font-semibold">Address</label>
-        <input
+        <AddressAutocompleteInput
           value={address}
-          onChange={(e) => setAddress(e.target.value)}
+          onChange={setAddress}
           className={inputClass}
         />
       </div>

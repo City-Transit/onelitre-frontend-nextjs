@@ -28,10 +28,11 @@ export const DELIVERY_TIME_BUFFER_MINUTES = 60;
 /** Customer-facing "delivery time" buckets — what's shown/filtered on the menu browser.
  * Ordered ascending; `maxMinutes` is the upper bound of prep + dispatch + buffer for that bucket. */
 export const DELIVERY_TIME_BUCKETS = [
-  { value: 'under-3h', label: 'Under 3 hours', maxMinutes: 180 },
-  { value: '3-6h', label: '3-6 hours', maxMinutes: 360 },
+  { value: 'under-2h', label: 'Under 2 hours', maxMinutes: 120 },
+  { value: '2-4h', label: '2-4 hours', maxMinutes: 240 },
+  { value: '4-6h', label: '4-6 hours', maxMinutes: 360 },
   { value: '6-12h', label: '6-12 hours', maxMinutes: 720 },
-  { value: '12-24h', label: '12-24hours', maxMinutes: 1440 },
+  { value: '12-24h', label: '12-24 hours', maxMinutes: 1440 },
   { value: 'up-to-48h', label: 'Up to 48 hours', maxMinutes: 2880 },
 ];
 
